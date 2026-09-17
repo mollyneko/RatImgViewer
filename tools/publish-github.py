@@ -142,17 +142,17 @@ def push_main(token):
 def release_body(version):
     base = 'https://github.com/%s/releases/latest/download' % repo_slug
     return (
-        '## Rat 看图王 V%s\n\n'
+        '## Rat 看图王 V{v}\n\n'
         'Windows 10 / 11 x64　·　单文件下载，无需安装运行库\n\n'
         '| 文件 | 说明 |\n|---|---|\n'
-        '| `RatImageViewer-Setup-V%s.exe` | 安装版：可选安装目录、创建快捷方式、可注册文件关联 |\n'
-        '| `RatImageViewer-Portable-V%s.exe` | 免安装版：单文件，双击即用，不写注册表 |\n'
+        '| `RatImageViewer-Setup-V{v}.exe` | 安装版：可选安装目录、创建快捷方式、可注册文件关联 |\n'
+        '| `RatImageViewer-Portable-V{v}.exe` | 免安装版：单文件，双击即用，不写注册表 |\n'
         '| `SHA256SUMS.txt` | 校验和，核对方式见下方 |\n\n'
         '### 直链\n\n'
-        '- 安装版：%s/RatImageViewer-Setup-V%s.exe\n'
-        '- 免安装版：%s/RatImageViewer-Portable-V%s.exe\n\n'
+        '- 安装版：{base}/RatImageViewer-Setup-V{v}.exe\n'
+        '- 免安装版：{base}/RatImageViewer-Portable-V{v}.exe\n\n'
         '### 本版内容\n\n'
-        '- 图片浏览：滚轮缩放 / 适应窗口 / 1:1，多标签，幻灯片，放大镜 2×\n'
+        '- 图片浏览：滚轮缩放 / 适应窗口 / 1:1，多标签，幻灯片，放大镜\n'
         '- 格式：JPG · PNG · WebP · GIF · BMP · ICO · SVG · AVIF · TIFF · PSD/PSB · HEIC · 相机 RAW\n'
         '- **CDR / CMX 矢量渲染**（内置 libcdr，不装 CorelDRAW 也能看）\n'
         '- **DWG / DXF 图纸查看**（内置 LibreDWG，支持图层与文字；DXF 支持 gb18030 / Big5）\n'
@@ -161,15 +161,15 @@ def release_body(version):
         '- EXIF 信息与 RGB 直方图，删除走系统回收站\n'
         '- 完全离线运行，不发任何网络请求\n\n'
         '### 安装说明\n\n'
-        '安装包未做代码签名，首次运行 Windows SmartScreen 会提示"已保护你的电脑"，'
+        '安装包未做代码签名，首次运行 Windows SmartScreen 会提示「已保护你的电脑」，'
         '点「更多信息」→「仍要运行」即可。\n\n'
         '### 校验下载完整性\n\n'
         '```\n'
-        'certutil -hashfile RatImageViewer-Setup-V%s.exe SHA256\n'
+        'certutil -hashfile RatImageViewer-Setup-V{v}.exe SHA256\n'
         '```\n'
         '把输出和 `SHA256SUMS.txt` 里对应行对比即可。\n\n'
-        '完整说明见 [README](https://github.com/%s#readme)。\n'
-    ) % ((version,) * 11 + (repo_slug,))
+        '完整说明见 [README](https://github.com/{repo}#readme)。\n'
+    ).format(v=version, base=base, repo=repo_slug)
 
 
 def get_or_create_release(repo, tag, version, token, dry):
@@ -235,23 +235,35 @@ def upload_assets(repo, release, files, token, dry):
 
 
 def update_repo_info(repo, token, dry):
-    """补上仓库简介与话题标签，让 GitHub 仓库页看起来完整。"""
+    """补上仓库简介与话题标签。已有的简介/话题不覆盖，只做「填空」和并集。"""
+    topics = ['image-viewer', 'windows', 'electron', 'cdr', 'coreldraw', 'dwg', 'dxf',
+              'cad', 'psd', 'raw', 'viewer', 'photo-viewer']
     payload = {
         'description': '轻量快速的 Windows 看图工具，原生支持 CDR/CMX 矢量与 DWG/DXF 图纸查看',
         'homepage': 'https://github.com/%s/releases/latest' % repo,
         'has_issues': True,
         'has_wiki': False,
-        'topics': ['image-viewer', 'windows', 'electron', 'cdr', 'coreldraw', 'dwg', 'dxf',
-                   'cad', 'psd', 'raw', 'viewer', 'photo-viewer'],
     }
+    status, cur = api('GET', '%s/repos/%s' % (API, repo), token)
+    if status == 200:
+        if (cur.get('description') or '').strip():
+            log('  仓库已有简介，保留原样：%s' % cur['description'])
+            payload.pop('description', None)
+        topics = sorted(set(cur.get('topics') or []) | set(topics))
     if dry:
-        log('  [dry-run] 将更新仓库简介与 topics')
+        log('  [dry-run] 将更新：' + '，'.join(list(payload.keys()) + ['topics']))
         return True
     status, data = api('PATCH', '%s/repos/%s' % (API, repo), token, payload)
     if status == 200:
-        log('  仓库简介与 topics 已更新')
+        log('  仓库信息已更新')
+    else:
+        log('  更新仓库信息失败：%s %s' % (status, str(data)[:300]))
+    # topics 必须走专用接口：PATCH /repos 里带 topics 会被静默忽略（返回 200 但不生效）
+    status, data = api('PUT', '%s/repos/%s/topics' % (API, repo), token, {'names': topics})
+    if status == 200:
+        log('  话题标签已更新（%d 个）' % len(topics))
         return True
-    log('  更新仓库信息失败：%s %s' % (status, str(data)[:300]))
+    log('  更新话题标签失败：%s %s' % (status, str(data)[:300]))
     return False
 
 

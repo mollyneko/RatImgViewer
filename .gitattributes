@@ -1,0 +1,22 @@
+* text=auto eol=lf
+
+# 源码与文档统一 LF
+*.js    text eol=lf
+*.json  text eol=lf
+*.html  text eol=lf
+*.css   text eol=lf
+*.md    text eol=lf
+*.yml   text eol=lf
+*.nsh   text eol=lf
+
+# 二进制：禁止任何换行转换与 diff
+*.exe    binary
+*.dll    binary
+*.ico    binary
+*.png    binary
+*.jpg    binary
+*.wasm   binary
+*.zst    binary
+
+# 第三方预编译产物在 GitHub 上折叠显示
+vendor/** linguist-generated=true

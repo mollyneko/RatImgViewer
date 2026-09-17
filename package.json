@@ -1,0 +1,64 @@
+{
+  "name": "rat-image-viewer",
+  "productName": "Rat看图王",
+  "version": "1.0.0",
+  "description": "高性能、轻量的全能看图软件,支持 CDR/PSD 内嵌预览",
+  "main": "src/main/main.js",
+  "author": "Rat",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "smoke": "electron . --smoke-test",
+    "dist": "electron-builder --win",
+    "dist:portable": "electron-builder --win portable",
+    "dist:dir": "electron-builder --win --dir"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.rat.imageviewer",
+    "productName": "Rat看图王",
+    "copyright": "Copyright (c) 2026 Rat",
+    "electronDist": "node_modules/electron/dist",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "!**/*.map",
+      "package.json"
+    ],
+    "extraResources": [
+      { "from": "vendor/cdr2svg", "to": "bin" },
+      { "from": "vendor/libredwg-web", "to": "libredwg" }
+    ],
+    "win": {
+      "target": [
+        { "target": "portable", "arch": ["x64"] },
+        { "target": "nsis", "arch": ["x64"] }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "RatImageViewer-V${version}-${arch}.${ext}"
+    },
+    "portable": {
+      "artifactName": "RatImageViewer-Portable-V${version}.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Rat看图王",
+      "installerLanguages": ["zh_CN"],
+      "language": "2052",
+      "artifactName": "RatImageViewer-Setup-V${version}.exe",
+      "include": "build/installer.nsh"
+    }
+  }
+}

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self' ratfile: data: blob:; img-src 'self' ratfile: data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self'; connect-src 'self' ratfile:" />
+<title>Rat看图王</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<svg class="sprite" aria-hidden="true"><defs>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 2h8l4 4v16H6z"/><path d="M14 2v4h4"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6h6l2 2h10v11H3z"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 9V4h5M20 15v5h-5M20 9V4h-5M4 15v5h5"/></symbol>
+  <symbol id="i-one" viewBox="0 0 24 24"><rect x="4.5" y="4.5" width="15" height="15" rx="1.5"/></symbol>
+  <symbol id="i-ccw" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/></symbol>
+  <symbol id="i-cw" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></symbol>
+  <symbol id="i-fliph" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 8l-4 4 4 4"/><path d="M16 8l4 4-4 4"/></symbol>
+  <symbol id="i-flipv" viewBox="0 0 24 24"><path d="M3 12h18"/><path d="M8 8l4-4 4 4"/><path d="M8 16l4 4 4-4"/></symbol>
+  <symbol id="i-crop" viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M2 6h14a2 2 0 0 1 2 2v14"/></symbol>
+  <symbol id="i-lens" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+  <symbol id="i-wand" viewBox="0 0 24 24"><path d="M11 4l1.4 4.1L16.5 9.5l-4.1 1.4L11 15l-1.4-4.1L5.5 9.5l4.1-1.4z"/><path d="M18 14l.8 2.2 2.2.8-2.2.8L18 20l-.8-2.2-2.2-.8 2.2-.8z"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 14h10l1-14"/></symbol>
+  <symbol id="i-dots" viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="2.6"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></symbol>
+  <symbol id="i-min" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-max" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="1"/></symbol>
+  <symbol id="i-restore" viewBox="0 0 24 24"><rect x="4" y="7" width="13" height="13" rx="1"/><path d="M8 7V4h12v12h-3"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></symbol>
+  <symbol id="i-compare" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M12 5v14"/></symbol>
+  <symbol id="i-batch" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2.1 2.1M16.9 16.9L19 19M19 5l-2.1 2.1M7.1 16.9L5 19"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+  <symbol id="i-slides" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8"/><path d="M12 16v4"/></symbol>
+</defs></svg>
+
+<div class="app" id="app" data-screen="view">
+
+  <!-- ============ 标题栏 ============ -->
+  <header class="titlebar" id="titlebar">
+    <div class="tb-logo">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5C4 4.67 4.67 4 5.5 4h13c.83 0 1.5.67 1.5 1.5v13c0 .83-.67 1.5-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-13Z" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="9.5" r="1.6" fill="currentColor"/><path d="M5 17l4.2-4.6 3.1 3 3-3.5L19 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+    <div class="tb-title">Rat看图王</div>
+    <div class="tabs" id="tabs"></div>
+    <button class="tab-add" id="btnAddTab" title="打开图片 (Ctrl+O)"><svg class="ic"><use href="#i-plus"/></svg></button>
+    <div class="tb-right">
+      <button class="tbtn icon" id="btnTheme" title="切换主题 (Ctrl+D)"><svg class="ic"><use href="#i-moon"/></svg></button>
+      <div class="tb-sep"></div>
+      <button class="winbtn" id="btnMin" title="最小化"><svg class="ic"><use href="#i-min"/></svg></button>
+      <button class="winbtn" id="btnMax" title="最大化"><svg class="ic"><use href="#i-max"/></svg></button>
+      <button class="winbtn close" id="btnClose" title="关闭"><svg class="ic"><use href="#i-close"/></svg></button>
+    </div>
+  </header>
+
+  <div class="body">
+
+    <!-- ============ 左侧导航 ============ -->
+    <nav class="rail">
+      <button class="rail-btn on" data-go="view" title="看图 (1)"><svg class="ic"><use href="#i-eye"/></svg><span>看图</span></button>
+      <button class="rail-btn" data-go="manage" title="管理 (2)"><svg class="ic"><use href="#i-grid"/></svg><span>管理</span></button>
+      <button class="rail-btn" data-go="compare" title="对比 (3)"><svg class="ic"><use href="#i-compare"/></svg><span>对比</span></button>
+      <button class="rail-btn" data-go="batch" title="批量 (4)"><svg class="ic"><use href="#i-batch"/></svg><span>批量</span></button>
+      <div class="rail-sp"></div>
+      <button class="rail-btn" data-go="settings" title="设置"><svg class="ic"><use href="#i-gear"/></svg><span>设置</span></button>
+    </nav>
+
+    <!-- ============ 看图 ============ -->
+    <section class="screen on" id="screen-view">
+      <div class="toolbar" id="toolbar">
+        <button class="tbtn" id="btnOpen"><svg class="ic"><use href="#i-file"/></svg>打开</button>
+        <button class="tbtn" id="btnFolder"><svg class="ic"><use href="#i-folder"/></svg>文件夹</button>
+        <div class="tsep"></div>
+        <button class="tbtn icon" id="btnPrev" title="上一张 (←)"><svg class="ic"><use href="#i-left"/></svg></button>
+        <button class="tbtn icon" id="btnNext" title="下一张 (→)"><svg class="ic"><use href="#i-right"/></svg></button>
+        <span class="tcount" id="navCount">0 / 0</span>
+        <div class="tsep"></div>
+        <button class="tbtn icon" id="btnZoomOut" title="缩小 (Ctrl+-)"><svg class="ic"><use href="#i-minus"/></svg></button>
+        <button class="tbtn icon" id="btnZoomIn" title="放大 (Ctrl+=)"><svg class="ic"><use href="#i-plus"/></svg></button>
+        <button class="tbtn" id="btnFit" title="适应窗口 (F)"><svg class="ic"><use href="#i-fit"/></svg>适应</button>
+        <button class="tbtn" id="btnOne" title="实际像素 (Ctrl+1)"><svg class="ic"><use href="#i-one"/></svg>1:1</button>
+        <span class="tcount" id="zoomVal">100%</span>
+        <div class="tsep"></div>
+        <button class="tbtn icon" id="btnRotL" title="左转 90° (,)"><svg class="ic"><use href="#i-ccw"/></svg></button>
+        <button class="tbtn icon" id="btnRotR" title="右转 90° (.)"><svg class="ic"><use href="#i-cw"/></svg></button>
+        <button class="tbtn icon" id="btnFlipH" title="水平翻转 (H)"><svg class="ic"><use href="#i-fliph"/></svg></button>
+        <button class="tbtn icon" id="btnFlipV" title="垂直翻转 (V)"><svg class="ic"><use href="#i-flipv"/></svg></button>
+        <div class="tsep"></div>
+        <button class="tbtn icon" id="btnCrop" title="裁剪 (C)"><svg class="ic"><use href="#i-crop"/></svg></button>
+        <button class="tbtn icon" id="btnLens" title="放大镜 (L)"><svg class="ic"><use href="#i-lens"/></svg></button>
+        <button class="tbtn icon" id="btnWand" title="一键美化"><svg class="ic"><use href="#i-wand"/></svg></button>
+        <button class="tbtn icon" id="btnReset" title="重置调整"><svg class="ic"><use href="#i-reset"/></svg></button>
+        <div class="tspacer"></div>
+        <button class="tbtn" id="btnSlides" title="幻灯片 (空格)"><svg class="ic"><use href="#i-slides"/></svg>放映</button>
+        <button class="tbtn icon" id="btnSave" title="另存为 (Ctrl+S)"><svg class="ic"><use href="#i-save"/></svg></button>
+        <button class="tbtn icon danger" id="btnTrash" title="删除到回收站 (Del)"><svg class="ic"><use href="#i-trash"/></svg></button>
+        <button class="tbtn icon" id="btnMore" title="更多操作"><svg class="ic"><use href="#i-dots"/></svg></button>
+      </div>
+
+      <div class="workarea">
+        <div class="viewport" id="viewport">
+          <div class="checker" id="stageWrap">
+            <img id="stage" alt="" draggable="false" />
+          </div>
+          <div class="empty-hint" id="emptyHint">
+            <svg class="ic big"><use href="#i-file"/></svg>
+            <div class="eh-t">把图片或文件夹拖进来</div>
+            <div class="eh-s">或点左上角「打开」/「文件夹」　支持 JPG · PNG · WebP · GIF · BMP · AVIF · SVG · TIFF · PSD · CDR · DWG · RAW</div>
+          </div>
+
+          <div class="crop-box" id="cropBox">
+            <div class="gl"></div>
+            <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
+            <span class="crop-size" id="cropSize">自由裁剪 · 拖动边角调整</span>
+          </div>
+
+          <div class="floating float-tc off" id="ratioRow">
+            <span class="pill-bar">
+              <span class="lbl">比例</span>
+              <button class="tbtn on" data-r="free">自由</button>
+              <button class="tbtn" data-r="1:1">1:1</button>
+              <button class="tbtn" data-r="4:3">4:3</button>
+              <button class="tbtn" data-r="3:2">3:2</button>
+              <button class="tbtn" data-r="16:9">16:9</button>
+              <button class="tbtn" data-r="orig">原图</button>
+              <span class="lbl">|</span>
+              <button class="tbtn" id="cropCancel">取消</button>
+              <button class="tbtn accent" id="cropApply">应用并另存</button>
+            </span>
+          </div>
+
+          <div class="floating float-tl">
+            <span class="pill" id="fmtPill">—</span>
+          </div>
+          <div class="floating float-tr">
+            <span class="pill" id="previewPill" style="display:none">内嵌预览</span>
+            <span class="pill">滚轮缩放 · 拖动平移</span>
+          </div>
+          <div class="floating float-bl">
+            <span class="pill">尺寸 <b id="dimPill">—</b></span>
+            <span class="pill">体积 <b id="sizePill">—</b></span>
+          </div>
+          <div class="floating float-br">
+            <span class="pill" id="perfPill">—</span>
+          </div>
+
+          <div class="nav-arrow l" id="arrowPrev">‹</div>
+          <div class="nav-arrow r" id="arrowNext">›</div>
+          <div class="zoom-lens" id="viewLens"></div>
+        </div>
+
+        <!-- 右侧信息栏 -->
+        <aside class="inspector" id="inspector">
+          <div class="sec">
+            <div class="sec-h">信息</div>
+            <div class="kv" id="kvInfo"></div>
+          </div>
+          <div class="sec">
+            <div class="sec-h">直方图</div>
+            <canvas class="hist" id="hist" width="240" height="72"></canvas>
+          </div>
+          <div class="sec">
+            <div class="sec-h">调整 <button class="mini-btn" id="btnReset2">重置</button></div>
+            <div class="slider-row"><label>亮度</label><input type="range" id="adjBright" min="-100" max="100" value="0"><span id="adjBrightV">0</span></div>
+            <div class="slider-row"><label>对比度</label><input type="range" id="adjContrast" min="-100" max="100" value="0"><span id="adjContrastV">0</span></div>
+            <div class="slider-row"><label>饱和度</label><input type="range" id="adjSat" min="-100" max="100" value="0"><span id="adjSatV">0</span></div>
+          </div>
+          <div class="sec">
+            <div class="sec-h">EXIF</div>
+            <div class="kv" id="kvExif"></div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="filmstrip" id="filmstrip"></div>
+    </section>
+
+    <!-- ============ 管理 ============ -->
+    <section class="screen" id="screen-manage">
+      <div class="mgbar">
+        <button class="tbtn" id="btnFolder2"><svg class="ic"><use href="#i-folder"/></svg>打开文件夹</button>
+        <span class="tcount" id="mgCount">0 项</span>
+        <div class="tspacer"></div>
+        <label class="mg-size">缩略图 <input type="range" id="mgSize" min="120" max="320" step="20" value="180"></label>
+      </div>
+      <div class="gridwrap"><div class="grid" id="grid"></div></div>
+    </section>
+
+    <!-- ============ 对比 ============ -->
+    <section class="screen" id="screen-compare">
+      <div class="cmpbar">
+        <span class="tcount">左</span><select id="cmpA" class="sel"></select>
+        <span class="tcount">右</span><select id="cmpB" class="sel"></select>
+        <button class="tbtn" id="btnCmpPick"><svg class="ic"><use href="#i-folder"/></svg>载入文件夹</button>
+        <div class="tspacer"></div>
+        <label class="mg-size">分割 <input type="range" id="cmpSplit" min="0" max="100" value="50"></label>
+      </div>
+      <div class="cmpwrap" id="cmpWrap">
+        <div class="cmp-pane"><img id="cmpImgA" alt="" draggable="false" /></div>
+        <div class="cmp-pane clipped" id="cmpPaneB"><img id="cmpImgB" alt="" draggable="false" /></div>
+        <div class="cmp-label a" id="cmpLabelA">—</div>
+        <div class="cmp-label b" id="cmpLabelB">—</div>
+        <div class="cmp-handle" id="cmpHandle"><span></span></div>
+      </div>
+    </section>
+
+    <!-- ============ 批量 ============ -->
+    <section class="screen" id="screen-batch">
+      <div class="btwrap">
+        <div class="btside">
+          <div class="sec-h">输出设置</div>
+          <label class="fld">格式
+            <select id="bFormat" class="sel">
+              <option value="image/jpeg">JPEG</option>
+              <option value="image/png">PNG</option>
+              <option value="image/webp">WebP</option>
+            </select>
+          </label>
+          <label class="fld">质量 <input type="range" id="bQuality" min="40" max="100" value="86"><span id="bQualityV">86</span></label>
+          <label class="fld">限制长边 <input type="number" id="bMaxEdge" value="0" min="0" step="256"><span class="hint">0 = 不缩放</span></label>
+          <label class="fld">输出目录
+            <span class="pathpick"><span id="bOutDir" class="path">—</span><button class="mini-btn" id="bPickOut">选择</button></span>
+          </label>
+          <div class="btnrow">
+            <button class="tbtn primary" id="bRun">开始转换</button>
+            <button class="tbtn" id="bClear">清空列表</button>
+          </div>
+          <div class="hint" id="bSummary">—</div>
+        </div>
+        <div class="bttable">
+          <div class="bthead"><span>文件</span><span>进度</span><span>状态</span><span>输出</span></div>
+          <div class="tbody" id="bRows"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 设置 ============ -->
+    <section class="screen" id="screen-settings">
+      <div class="setwrap">
+        <div class="card">
+          <h2>外观</h2>
+          <div class="row"><span class="lbl">主题</span>
+            <div class="seg" id="segTheme">
+              <button data-mode="light" class="on">白天</button>
+              <button data-mode="dark">黑夜</button>
+              <button data-mode="system">跟随系统</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>默认看图软件</h2>
+          <p class="note">
+            按 Windows 规定，程序不能自己把自己设成默认打开方式（微软刻意禁止，防止软件抢关联）。
+            正确做法是：本程序先把自己注册成<strong>候选</strong>，再由你在系统设置里点一下确认。
+            下面一键完成前两步。
+          </p>
+          <div class="kv kv-line" id="assocInfo"></div>
+          <div class="btnrow">
+            <button class="tbtn primary" id="btnAssoc">① 注册为候选看图程序</button>
+            <button class="tbtn" id="btnAssocOpen">② 打开系统「默认应用」页</button>
+            <button class="tbtn" id="btnAssocOff">注销关联</button>
+            <button class="tbtn" id="btnRevealExe">打开程序所在位置</button>
+          </div>
+          <div class="hint" id="assocHint"></div>
+          <div class="steps">
+            <div class="step"><b>1</b><div>点「① 注册为候选看图程序」——写入 HKCU 注册表（无需管理员权限，只写当前用户）。</div></div>
+            <div class="step"><b>2</b><div>点「② 打开系统默认应用页」——在 Windows 11 会直接跳到本程序的页面。</div></div>
+            <div class="step"><b>3</b><div>把 <b>.jpg .png .webp .cdr .psd</b> 等扩展名逐个选成 <b>Rat看图王</b>，完成。</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>支持的格式</h2>
+          <div class="fmts" id="fmtList"></div>
+        </div>
+
+        <div class="card">
+          <h2>快捷键</h2>
+          <div class="keys" id="keyList"></div>
+        </div>
+
+        <div class="card">
+          <h2>关于</h2>
+          <div class="kv kv-line" id="aboutInfo"></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer class="statusbar">
+    <span class="s" id="sbFile">未打开文件</span>
+    <span class="s sp" id="sbOp">就绪</span>
+  </footer>
+</div>
+
+<div class="ctx-menu" id="ctxMenu"></div>
+<div class="toast" id="toast"></div>
+<div class="drop-veil" id="dropVeil"><div>松开以打开</div></div>
+
+<script src="app.js"></script>
+</body>
+</html>

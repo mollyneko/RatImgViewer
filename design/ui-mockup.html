@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rat看图王 · UI 设计稿（Electron）</title>
+<style>
+/* ============================================================
+   Rat看图王 — Design Draft
+   主题：默认 light，data-theme="dark" 切换夜间
+   ============================================================ */
+
+:root{
+  /* ---- Light（默认） ---- */
+  --bg-app:      #f4f6f9;
+  --bg-panel:    #ffffff;
+  --bg-sub:      #fafbfd;
+  --bg-elev:     #ffffff;
+  --bg-canvas:   #e9ecf1;
+  --bg-hover:    #eef1f6;
+  --bg-active:   #e4eafb;
+  --bg-sunken:   #eceff4;
+
+  --text:        #1a1e26;
+  --text-2:      #5a6472;
+  --text-3:      #8a93a3;
+
+  --border:      #e2e6ee;
+  --border-2:    #d3d9e4;
+
+  --accent:      #3d6bf5;
+  --accent-2:    #6d8dff;
+  --accent-soft: #e7edff;
+  --accent-text: #ffffff;
+
+  --ok:          #12a150;
+  --warn:        #d98026;
+  --danger:      #e04b4b;
+  --cdr:         #8b5cf6;
+  --raw:         #e0518a;
+
+  --shadow-1: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.04);
+  --shadow-2: 0 8px 24px rgba(16,24,40,.10), 0 2px 6px rgba(16,24,40,.06);
+  --shadow-app: 0 24px 60px rgba(16,24,40,.16), 0 2px 8px rgba(16,24,40,.08);
+
+  --radius: 10px;
+  --radius-s: 7px;
+
+  --page: linear-gradient(180deg,#eef1f6 0%, #e6eaf1 100%);
+  --page-text: #232833;
+  --page-text-2: #626d7d;
+  --page-card: rgba(255,255,255,.72);
+
+  --checker-a: #ffffff;
+  --checker-b: #eef0f4;
+  --note-bg: #e04b4b;
+}
+
+[data-theme="dark"]{
+  --bg-app:      #14161b;
+  --bg-panel:    #1c1f26;
+  --bg-sub:      #191c22;
+  --bg-elev:     #22262f;
+  --bg-canvas:   #0e1014;
+  --bg-hover:    #262b34;
+  --bg-active:   #28304a;
+  --bg-sunken:   #12141a;
+
+  --text:        #e6e9ef;
+  --text-2:      #a3abba;
+  --text-3:      #6e7787;
+
+  --border:      #2a2f39;
+  --border-2:    #373d49;
+
+  --accent:      #6b8dff;
+  --accent-2:    #8ba3ff;
+  --accent-soft: #22305c;
+  --accent-text: #0e1116;
+
+  --ok:          #34d07f;
+  --warn:        #e0a04a;
+  --danger:      #f2696a;
+  --cdr:         #a78bfa;
+  --raw:         #f472b6;
+
+  --shadow-1: 0 1px 2px rgba(0,0,0,.4);
+  --shadow-2: 0 8px 26px rgba(0,0,0,.45);
+  --shadow-app: 0 28px 70px rgba(0,0,0,.6), 0 2px 8px rgba(0,0,0,.4);
+
+  --page: linear-gradient(180deg,#0f1116 0%, #161922 100%);
+  --page-text: #e8ebf1;
+  --page-text-2: #99a2b1;
+  --page-card: rgba(255,255,255,.05);
+
+  --checker-a: #23262e;
+  --checker-b: #2b2f39;
+  --note-bg: #f2696a;
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0; padding:0;
+  font: 13px/1.55 "Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,"Microsoft YaHei UI","PingFang SC",sans-serif;
+  background: var(--page);
+  color: var(--page-text);
+  -webkit-font-smoothing: antialiased;
+  transition: background .25s ease, color .25s ease;
+}
+
+/* ================= 页面外壳 ================= */
+.stage{ padding: 22px 20px 40px; min-height:100%; }
+.wrap{ max-width: 1460px; margin: 0 auto; }
+
+.page-top{ display:flex; align-items:center; gap:16px; margin-bottom:14px; flex-wrap:wrap; }
+.brand-mark{ display:flex; align-items:center; gap:10px; }
+.logo-badge{
+  width:34px;height:34px;border-radius:9px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--accent),#8b5cf6);
+  box-shadow: var(--shadow-1); color:#fff;
+}
+.page-title{ font-size:17px; font-weight:650; letter-spacing:.2px; }
+.page-sub{ font-size:12px; color: var(--page-text-2); }
+
+.top-spacer{ flex:1; }
+
+.seg{ display:flex; background: var(--page-card); border:1px solid var(--border); border-radius:999px; padding:3px; gap:2px; backdrop-filter: blur(8px); }
+.seg button{
+  border:0; background:transparent; color: var(--page-text-2); font:inherit; font-size:12px;
+  padding:6px 13px; border-radius:999px; cursor:pointer; display:flex; align-items:center; gap:6px;
+  transition: all .18s ease;
+}
+.seg button.on{ background: var(--bg-elev); color: var(--page-text); box-shadow: var(--shadow-1); font-weight:600; }
+[data-theme="dark"] .seg button.on{ background:#333a48; }
+
+.legend{ display:flex; gap:8px; flex-wrap:wrap; margin: 0 0 14px; }
+.legend span{
+  font-size:11.5px; color: var(--page-text-2); border:1px solid var(--border); border-radius:999px;
+  padding:3px 10px; background: var(--page-card);
+}
+
+/* ================= 应用窗口 ================= */
+.app{
+  position:relative;
+  background: var(--bg-app);
+  border:1px solid var(--border-2);
+  border-radius: 14px;
+  overflow:hidden;
+  box-shadow: var(--shadow-app);
+  color: var(--text);
+  display:flex; flex-direction:column;
+  height: 860px;
+  transition: background .25s ease, border-color .25s ease;
+}
+
+/* ---- 标题栏 ---- */
+.titlebar{
+  height:40px; flex:0 0 40px; background: var(--bg-panel);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:10px; padding-left:10px;
+  -webkit-user-select:none; user-select:none;
+}
+.tb-logo{ width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,var(--accent),#8b5cf6); display:grid;place-items:center;color:#fff; flex:0 0 auto; }
+.tb-title{ font-size:12.5px; color: var(--text-2); font-weight:600; white-space:nowrap;
+  max-width:150px; overflow:hidden; text-overflow:ellipsis; flex:0 1 auto; min-width:0; }
+
+.tabs{ display:flex; align-items:center; gap:6px; height:100%; padding:5px 0 0; min-width:0; overflow:hidden; }
+.tab{
+  height:30px; min-width:120px; max-width:180px; flex:0 1 auto;
+  display:flex; align-items:center; gap:7px; padding:0 10px;
+  border-radius:8px 8px 0 0; background: var(--bg-sub);
+  border:1px solid transparent;
+  font-size:12px; color: var(--text-2); cursor:pointer;
+  position:relative; overflow:hidden;
+}
+.tab:hover{ background: var(--bg-hover); }
+.tab.active{ background: var(--bg-app); border-color: var(--border); border-bottom-color: var(--bg-app); color: var(--text); font-weight:600; }
+.tab .dot{ width:6px;height:6px;border-radius:50%; flex:0 0 auto; }
+.tab .nm{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tab .x{ margin-left:auto; opacity:.5; font-size:13px; line-height:1; }
+.tab .x:hover{ opacity:1; }
+.tab-add{ height:26px;width:28px;border-radius:6px;display:grid;place-items:center;color:var(--text-3);cursor:pointer;flex:0 0 auto; }
+.tab-add:hover{ background: var(--bg-hover); color: var(--text); }
+
+.tb-search{
+  margin-left:auto; margin-right:8px;
+  height:28px; min-width:210px; border-radius:8px;
+  background: var(--bg-sunken); border:1px solid transparent;
+  display:flex; align-items:center; gap:7px; padding:0 10px; color: var(--text-3); font-size:12px;
+}
+.tb-search input{ border:0; background:transparent; outline:none; font:inherit; color:var(--text); width:100%; }
+.tb-search input::placeholder{ color: var(--text-3); }
+.tb-search:focus-within{ border-color: var(--accent); background: var(--bg-panel); }
+
+.winbtns{ display:flex; flex:0 0 auto; }
+.winbtn{ width:44px;height:40px; display:grid;place-items:center; border:0;background:transparent;color:var(--text-2);font-size:13px;cursor:pointer; }
+.winbtn:hover{ background: var(--bg-hover); }
+.winbtn.close:hover{ background:#e04b4b; color:#fff; }
+
+/* ---- 菜单行 ---- */
+.menubar{
+  height:34px; flex:0 0 34px; background: var(--bg-panel); border-bottom:1px solid var(--border);
+  display:flex; align-items:center; padding:0 6px; gap:2px; font-size:12.5px; color: var(--text-2);
+}
+.menubar .item{ padding:4px 10px; border-radius:6px; cursor:pointer; }
+.menubar .item:hover{ background: var(--bg-hover); color: var(--text); }
+.menubar .right{ margin-left:auto; display:flex; align-items:center; gap:6px; color: var(--text-3); font-size:11.5px; }
+
+/* ---- 工具栏 ---- */
+.toolbar{
+  flex:0 0 48px; height:48px; background: var(--bg-panel); border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:4px; padding:0 10px; overflow-x:auto; overflow-y:hidden; scrollbar-width:thin;
+}
+.toolbar::-webkit-scrollbar{ height:5px; }
+.toolbar::-webkit-scrollbar-thumb{ background: var(--border-2); border-radius:3px; }
+.tbtn{
+  height:32px; min-width:32px; padding:0 8px; border-radius:7px; border:0; background:transparent;
+  color: var(--text-2); display:inline-flex; align-items:center; gap:6px; font:inherit; font-size:12.5px; cursor:pointer;
+  white-space:nowrap;
+}
+.tbtn:hover{ background: var(--bg-hover); color: var(--text); }
+.tbtn.on{ background: var(--accent-soft); color: var(--accent); font-weight:600; }
+[data-theme="dark"] .tbtn.on{ color: var(--accent-2); }
+.tbtn.icon{ padding:0 6px; }
+.tbtn:disabled{ opacity:.35; cursor:default; }
+.tsep{ width:1px; height:20px; background: var(--border); margin:0 5px; flex:0 0 auto; }
+.zoom-group{ display:flex; align-items:center; background: var(--bg-sunken); border-radius:8px; padding:2px; gap:1px; }
+.zoom-group .tbtn{ height:28px; }
+.zoom-val{ font-size:12px; color: var(--text); min-width:52px; text-align:center; font-variant-numeric: tabular-nums; }
+
+/* ---- 主体 ---- */
+.body{ flex:1 1 auto; display:flex; min-height:0; }
+/* 屏幕容器：flex 子项必须 min-width:0，否则内部超宽内容会把整列顶出去 */
+.body-inner{ min-width:0; min-height:0; }
+
+.rail{
+  flex:0 0 56px; width:56px; background: var(--bg-sub); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; align-items:center; gap:4px; padding:10px 0;
+}
+.rail-btn{
+  width:40px; height:40px; border-radius:9px; border:0; background:transparent; color: var(--text-3);
+  display:grid; place-items:center; cursor:pointer; position:relative;
+}
+.rail-btn:hover{ background: var(--bg-hover); color: var(--text); }
+.rail-btn.on{ background: var(--accent-soft); color: var(--accent); }
+[data-theme="dark"] .rail-btn.on{ color: var(--accent-2); }
+.rail-btn.on::before{ content:""; position:absolute; left:-8px; top:9px; bottom:9px; width:3px; border-radius:0 3px 3px 0; background: var(--accent); }
+.rail-sp{ flex:1; }
+
+.side{
+  flex:0 0 230px; width:230px; background: var(--bg-panel); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; min-height:0;
+}
+.side-head{ padding:10px 12px 6px; font-size:11px; letter-spacing:.6px; color: var(--text-3); font-weight:700; text-transform:uppercase; }
+.tree{ padding:2px 8px 10px; overflow:auto; flex:1; }
+.tnode{ display:flex; align-items:center; gap:7px; padding:5px 8px; border-radius:7px; font-size:12.5px; color: var(--text-2); cursor:pointer; }
+.tnode:hover{ background: var(--bg-hover); color: var(--text); }
+.tnode.sel{ background: var(--bg-active); color: var(--accent); font-weight:600; }
+[data-theme="dark"] .tnode.sel{ color: var(--accent-2); }
+.tnode .cnt{ margin-left:auto; font-size:11px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.tnode.ind-2{ padding-left:24px; }
+.side-foot{ border-top:1px solid var(--border); padding:10px 12px; font-size:11.5px; color: var(--text-3); display:flex; flex-direction:column; gap:6px; }
+.meterline{ display:flex; align-items:center; gap:8px; }
+.bar{ flex:1; height:5px; border-radius:3px; background: var(--bg-sunken); overflow:hidden; }
+.bar > i{ display:block; height:100%; border-radius:3px; background: linear-gradient(90deg,var(--accent),var(--cdr)); }
+
+/* ---- 画布 ---- */
+.canvas-wrap{ flex:1 1 auto; display:flex; flex-direction:column; min-width:0; background: var(--bg-app); }
+.viewport{
+  flex:1 1 auto; position:relative; overflow:hidden; display:grid; place-items:center;
+  background-color: var(--bg-canvas);
+  background-image: radial-gradient(circle at 50% 40%, rgba(120,140,190,.10), transparent 62%);
+}
+.checker{
+  border-radius:4px; position:relative;
+  background-image:
+    linear-gradient(45deg, var(--checker-b) 25%, transparent 25%, transparent 75%, var(--checker-b) 75%),
+    linear-gradient(45deg, var(--checker-b) 25%, transparent 25%, transparent 75%, var(--checker-b) 75%);
+  background-size: 18px 18px; background-position: 0 0, 9px 9px;
+  box-shadow: var(--shadow-2);
+  transform: scale(var(--z,1)) scaleX(var(--flip,1)) scaleY(var(--flipy,1)) rotate(var(--rot,0deg));
+  transform-origin:center center;
+  transition: transform .18s ease, box-shadow .25s ease;
+  overflow:hidden; line-height:0;
+}
+.viewport.grabbing{ cursor:grabbing; }
+.viewport .hidden-mouse{ cursor:grab; }
+
+.floating{ position:absolute; display:flex; gap:6px; z-index:4; }
+.float-tl{ left:12px; top:12px; }
+.float-tr{ right:12px; top:12px; }
+.float-br{ right:12px; bottom:12px; }
+.float-bl{ left:12px; bottom:12px; }
+.float-tc{ left:50%; top:52px; transform:translateX(-50%); max-width:calc(100% - 24px); z-index:6; }
+.pill-bar{ display:flex; align-items:center; gap:3px; background:var(--bg-elev); border:1px solid var(--border);
+  border-radius:10px; padding:4px 7px; box-shadow:var(--shadow-1); }
+.pill-bar .lbl{ font-size:11.5px; color:var(--text-3); margin:0 4px 0 2px; }
+.pill-bar .tbtn{ height:26px; min-width:26px; padding:0 8px; font-size:11.5px; }
+.pill{
+  background: var(--bg-elev); border:1px solid var(--border); border-radius:8px;
+  padding:5px 9px; font-size:11.5px; color: var(--text-2); box-shadow: var(--shadow-1);
+  display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+}
+.pill b{ color: var(--text); font-weight:650; }
+.pill.acc{ background: var(--accent); border-color: var(--accent); color:#fff; }
+[data-theme="dark"] .pill.acc{ color:#0e1116; }
+.pill.cdr{ border-color: var(--cdr); color: var(--cdr); }
+.pill.raw{ border-color: var(--raw); color: var(--raw); }
+
+.nav-arrow{
+  position:absolute; top:50%; transform:translateY(-50%); width:44px;height:64px;
+  display:grid;place-items:center; border-radius:10px; cursor:pointer;
+  background: var(--bg-elev); border:1px solid var(--border); color: var(--text-2);
+  box-shadow: var(--shadow-1); opacity:.9;
+}
+.nav-arrow:hover{ color: var(--text); box-shadow: var(--shadow-2); }
+.nav-arrow.l{ left:14px; } .nav-arrow.r{ right:14px; }
+
+/* 胶片条 */
+.filmstrip{
+  flex:0 0 104px; height:104px; background: var(--bg-panel); border-top:1px solid var(--border);
+  display:flex; align-items:center; gap:8px; padding:0 10px; overflow-x:auto; scrollbar-width:thin;
+}
+.thumb{
+  flex:0 0 auto; width:92px; height:76px; border-radius:8px; overflow:hidden; cursor:pointer;
+  border:2px solid transparent; background: var(--bg-sunken); position:relative;
+}
+.thumb.selected{ border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.thumb:hover{ filter:brightness(1.06); }
+.thumb .tag{
+  position:absolute; left:3px; bottom:3px; font-size:9.5px; padding:1px 5px; border-radius:5px;
+  background: rgba(0,0,0,.62); color:#fff; font-weight:700; letter-spacing:.4px;
+}
+.thumb .tag.cdr{ background: rgba(139,92,246,.92); }
+.thumb .tag.raw{ background: rgba(224,81,138,.92); }
+.thumb .nm{ position:absolute; left:0; right:0; top:0; padding:3px 5px; font-size:9.5px; color:#fff; font-weight:600;
+  text-shadow:0 1px 2px rgba(0,0,0,.7);
+  background:linear-gradient(180deg,rgba(0,0,0,.78),rgba(0,0,0,.42) 62%,transparent); }
+
+/* ---- 属性面板 ---- */
+.inspector{
+  flex:0 0 286px; width:286px; background: var(--bg-panel); border-left:1px solid var(--border);
+  display:flex; flex-direction:column; min-height:0;
+}
+.insp-tabs{ display:flex; padding:8px 8px 0; gap:2px; border-bottom:1px solid var(--border); }
+.insp-tab{ flex:1; text-align:center; padding:6px 0 8px; font-size:12px; color: var(--text-3); cursor:pointer; border-bottom:2px solid transparent; }
+.insp-tab.on{ color: var(--accent); border-bottom-color: var(--accent); font-weight:650; }
+[data-theme="dark"] .insp-tab.on{ color: var(--accent-2); }
+.insp-body{ overflow:auto; padding:10px 12px 20px; flex:1; }
+.sec{ margin-bottom:14px; }
+.sec-h{ font-size:11px; letter-spacing:.6px; color: var(--text-3); font-weight:700; text-transform:uppercase; margin-bottom:7px; display:flex; align-items:center; gap:6px; }
+.sec-h .line{ flex:1; height:1px; background: var(--border); }
+
+.kv{ display:flex; justify-content:space-between; gap:10px; padding:4px 0; font-size:12.5px; }
+.kv .k{ color: var(--text-3); flex:0 0 84px; }
+.kv .v{ color: var(--text); text-align:right; word-break:break-all; }
+.kv .v.mono{ font-family:"Cascadia Mono",Consolas,monospace; font-size:11.5px; }
+
+.histo{ width:100%; height:86px; border-radius:8px; background: var(--bg-sunken); border:1px solid var(--border); }
+.swatches{ display:grid; grid-template-columns:repeat(6,1fr); gap:6px; }
+.sw{ aspect-ratio:1; border-radius:6px; border:1px solid var(--border); }
+.eyedropper{ display:flex; align-items:center; gap:8px; margin-top:8px; font-size:12px; color: var(--text-2); }
+.color-dot{ width:22px;height:22px;border-radius:6px;border:1px solid var(--border); box-shadow: var(--shadow-1); }
+
+.tag-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+.chip{ font-size:11.5px; padding:3px 9px; border-radius:999px; background: var(--bg-sunken); color: var(--text-2); border:1px solid var(--border); }
+.chip.add{ color: var(--text-3); border-style:dashed; }
+
+.btn{ border:1px solid var(--border-2); background: var(--bg-elev); color: var(--text); border-radius:8px; padding:6px 12px; font:inherit; font-size:12.5px; cursor:pointer; }
+.btn:hover{ background: var(--bg-hover); }
+.btn.primary{ background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight:600; }
+.btn.primary:hover{ filter:brightness(1.06); }
+.btn.ghost{ background:transparent; }
+.btn-row{ display:flex; gap:8px; }
+
+/* ---- 浏览（网格）模式 ---- */
+.grid-screen{ flex:1 1 auto; display:flex; flex-direction:column; min-width:0; background: var(--bg-app); }
+.grid-tools{
+  height:44px; flex:0 0 44px; background: var(--bg-panel); border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:8px; padding:0 12px; font-size:12.5px; color: var(--text-2);
+}
+.select{ height:28px; border-radius:7px; border:1px solid var(--border-2); background: var(--bg-elev); color: var(--text); font:inherit; font-size:12px; padding:0 8px; }
+.grid-scroll{ flex:1 1 auto; overflow:auto; padding:14px 16px 24px; }
+.grid{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(158px,1fr)); gap:14px;
+}
+.cell{
+  background: var(--bg-panel); border:1px solid var(--border); border-radius:10px; overflow:hidden; cursor:pointer;
+  box-shadow: var(--shadow-1); transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.cell:hover{ transform:translateY(-2px); box-shadow: var(--shadow-2); border-color: var(--border-2); }
+.cell.selected{ border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.cell .pv{ height:110px; position:relative; overflow:hidden; background: var(--bg-sunken); }
+.cell .mt{ padding:7px 9px 9px; }
+.cell .ttl{ font-size:12px; color: var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600; }
+.cell .sub{ font-size:11px; color: var(--text-3); display:flex; justify-content:space-between; margin-top:3px; }
+.badge{ position:absolute; left:6px; top:6px; font-size:9.5px; font-weight:700; padding:2px 6px; border-radius:5px; color:#fff; letter-spacing:.4px; }
+.badge.cdr{ background: var(--cdr); } .badge.raw{ background: var(--raw); }
+.badge.svg{ background:#f4a12c; color:#2a1a00; } .badge.psd{ background:#2f9cd6; }
+.badge.heic{ background:#12a150; } .badge.gif{ background:#8892a6; }
+.badge.jpg{ background:#e0518a; } .badge.png{ background:#31a8ff; }
+.badge.webp{ background:#12a150; } .badge.tiff{ background:#6366f1; }
+
+/* ---- 对比模式 ---- */
+.cmp-screen{ flex:1 1 auto; display:flex; flex-direction:column; min-width:0; background: var(--bg-app); }
+.cmp-body{ flex:1 1 auto; position:relative; overflow:hidden; margin:12px; border-radius:12px; background: var(--bg-canvas); box-shadow: var(--shadow-1); }
+.cmp-pane{ position:absolute; inset:0; overflow:hidden; display:grid; place-items:center; }
+.cmp-pane.a{ clip-path: inset(0 calc(100% - var(--split,50%)) 0 0); }
+.cmp-label{ position:absolute; top:10px; font-size:11.5px; padding:4px 9px; border-radius:7px; background: var(--bg-elev); border:1px solid var(--border); color: var(--text-2); z-index:3; }
+.cmp-label.a{ left:10px; } .cmp-label.b{ right:10px; }
+.cmp-handle{ position:absolute; top:0; bottom:0; left: var(--split,50%); width:2px; background: var(--accent); z-index:4; }
+.cmp-handle::after{
+  content:""; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:26px;height:26px;border-radius:50%;background:var(--accent); border:3px solid var(--bg-elev);
+  box-shadow: var(--shadow-2);
+}
+.zoom-lens{
+  position:absolute; width:120px;height:120px;border-radius:50%; border:2px solid var(--bg-elev);
+  box-shadow: var(--shadow-2); overflow:hidden; z-index:6; display:none; pointer-events:none;
+  background: var(--bg-canvas);
+}
+
+/* ---- 批量处理 ---- */
+.batch-screen{ flex:1 1 auto; display:flex; flex-direction:column; min-width:0; background: var(--bg-app); }
+.batch-body{ flex:1 1 auto; padding:14px 16px; overflow:auto; }
+.table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+.table th{ text-align:left; color: var(--text-3); font-weight:700; font-size:11px; letter-spacing:.5px; padding:8px 10px; border-bottom:1px solid var(--border); }
+.table td{ padding:9px 10px; border-bottom:1px solid var(--border); color: var(--text-2); }
+.table td.n{ color: var(--text); font-weight:600; }
+.table tr:hover td{ background: var(--bg-hover); }
+.pbar{ display:block; width:100%; height:6px; border-radius:3px; background: var(--bg-sunken); overflow:hidden; min-width:90px; }
+.pbar > i{ display:block; height:100%; background: linear-gradient(90deg,var(--accent),var(--accent-2)); }
+.pbar > i.done{ background: var(--ok); }
+.pbar > i.err{ background: var(--danger); }
+
+/* ---- 设置 ---- */
+.set-screen{ flex:1 1 auto; display:flex; min-width:0; background: var(--bg-app); }
+.set-nav{ flex:0 0 190px; width:190px; background: var(--bg-panel); border-right:1px solid var(--border); padding:12px 10px; overflow:auto; }
+.set-nav-item{ padding:8px 10px; border-radius:8px; font-size:12.5px; color: var(--text-2); cursor:pointer; }
+.set-nav-item:hover{ background: var(--bg-hover); }
+.set-nav-item.on{ background: var(--bg-active); color: var(--accent); font-weight:600; }
+[data-theme="dark"] .set-nav-item.on{ color: var(--accent-2); }
+.set-body{ flex:1 1 auto; overflow:auto; padding:16px 20px 40px; }
+.set-card{ background: var(--bg-panel); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:14px; box-shadow: var(--shadow-1); }
+.set-card h4{ margin:0 0 4px; font-size:13.5px; }
+.set-card p.desc{ margin:0 0 12px; font-size:12px; color: var(--text-3); }
+.row{ display:flex; align-items:center; gap:12px; padding:9px 0; border-top:1px solid var(--border); }
+.row:first-of-type{ border-top:0; }
+.row .label{ flex:1 1 auto; }
+.row .label .l1{ font-size:12.5px; color: var(--text); }
+.row .label .l2{ font-size:11.5px; color: var(--text-3); margin-top:2px; }
+
+.switch{ width:40px;height:22px;border-radius:999px;background: var(--bg-sunken); border:1px solid var(--border-2); position:relative; cursor:pointer; flex:0 0 auto; transition: background .2s ease; }
+.switch i{ position:absolute; top:2px; left:2px; width:16px;height:16px;border-radius:50%; background: var(--text-3); transition: transform .2s ease, background .2s ease; }
+.switch.on{ background: var(--accent); border-color: var(--accent); }
+.switch.on i{ transform:translateX(18px); background:#fff; }
+[data-theme="dark"] .switch.on i{ background:#0e1116; }
+
+input[type=range]{ -webkit-appearance:none; appearance:none; width:170px; height:4px; border-radius:3px; background: var(--bg-sunken); outline:none; }
+input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:14px;height:14px;border-radius:50%; background: var(--accent); border:2px solid var(--bg-elev); box-shadow: var(--shadow-1); cursor:pointer; }
+.range-val{ font-variant-numeric: tabular-nums; font-size:12px; color: var(--text-2); min-width:58px; text-align:right; }
+
+.fmt-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(246px,1fr)); gap:8px; }
+.fmt{ border:1px solid var(--border); border-radius:9px; padding:8px 11px; background: var(--bg-sub); display:flex; align-items:center; gap:9px; }
+.fmt .ic{ width:28px;height:28px;border-radius:6px; display:grid;place-items:center; font-size:8.5px; font-weight:800; color:#fff; flex:0 0 auto; letter-spacing:.2px; }
+.fmt .nm{ font-size:12px; color: var(--text); font-weight:650; }
+.fmt .en{ font-size:10.5px; color: var(--text-3); }
+.fmt .en b{ color: var(--text-2); font-weight:600; }
+.fmt.off{ opacity:.45; }
+.fmt-group{ margin-bottom:14px; }
+.fmt-group-h{ display:flex; align-items:center; gap:8px; font-size:11px; font-weight:700; letter-spacing:.5px;
+  text-transform:uppercase; color: var(--text-3); margin-bottom:8px; }
+.fmt-group-h .note{ font-weight:400; letter-spacing:0; text-transform:none; font-size:11px; }
+.fmt-group-h .badge2{ font-size:10px; font-weight:700; letter-spacing:0; text-transform:none; padding:1px 7px; border-radius:999px;
+  background: var(--accent-soft); color: var(--accent); }
+[data-theme="dark"] .fmt-group-h .badge2{ color: var(--accent-2); }
+.fmt-group-h .badge2.pl{ background: var(--sunken); color: var(--text-3); }
+
+/* ---- 状态栏 ---- */
+.statusbar{
+  flex:0 0 26px; height:26px; background: var(--bg-panel); border-top:1px solid var(--border);
+  display:flex; align-items:center; gap:14px; padding:0 12px; font-size:11.5px; color: var(--text-3);
+  font-variant-numeric: tabular-nums; overflow:hidden; white-space:nowrap;
+}
+.statusbar .s{ display:flex; align-items:center; gap:5px; white-space:nowrap; }
+.statusbar .s.sp{ margin-left:auto; overflow:hidden; text-overflow:ellipsis; }
+.statusbar .sp{ margin-left:auto; }
+.statusbar b{ color: var(--text-2); font-weight:600; }
+
+/* ---- 标注 ---- */
+.notes{ position:absolute; inset:0; pointer-events:none; display:none; }
+.notes.show{ display:block; }
+.note{ position:absolute; pointer-events:auto; display:flex; align-items:flex-start; gap:7px; max-width:250px; z-index:20; }
+.note .pin{
+  width:20px;height:20px;border-radius:50%; background: var(--note-bg); color:#fff; font-size:11px; font-weight:800;
+  display:grid;place-items:center; box-shadow:0 0 0 3px rgba(224,75,75,.22); flex:0 0 auto; cursor:help;
+  animation: pulse 2.2s infinite;
+}
+@keyframes pulse{ 0%,100%{ box-shadow:0 0 0 3px rgba(224,75,75,.20);} 50%{ box-shadow:0 0 0 8px rgba(224,75,75,.06);} }
+.note .pop{
+  background: var(--bg-elev); border:1px solid var(--border-2); border-radius:9px; padding:7px 10px;
+  box-shadow: var(--shadow-2); font-size:11.5px; line-height:1.5; color: var(--text-2); opacity:0; transform:translateY(-3px);
+  transition: opacity .16s ease, transform .16s ease;
+}
+.note:hover .pop{ opacity:1; transform:translateY(0); }
+.note .pop b{ display:block; color: var(--text); font-size:12px; margin-bottom:2px; }
+
+/* ---- 页脚 ---- */
+.page-foot{ margin-top:16px; font-size:12px; color: var(--page-text-2); line-height:1.7; }
+.page-foot code{ background: var(--page-card); border:1px solid var(--border); border-radius:5px; padding:1px 6px; font-size:11.5px; }
+
+/* ---- 滚动条 ---- */
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-thumb{ background: var(--border-2); border-radius:6px; border:2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover{ background: var(--text-3); background-clip: content-box; }
+::-webkit-scrollbar-track{ background: transparent; }
+
+/* ---- 轻量调整滑块 ---- */
+.slider-row{ padding:7px 0; border-top:1px solid var(--border); }
+.slider-row:first-child{ border-top:0; }
+.slider-row .top{ display:flex; align-items:center; font-size:12.5px; color:var(--text); margin-bottom:6px; }
+.slider-row .top .val{ margin-left:auto; font-variant-numeric:tabular-nums; color:var(--text-3); font-size:11.5px; }
+.slider-row input[type=range]{ width:100%; }
+.slider-row.mod .top .val{ color:var(--accent); font-weight:700; }
+.slider-row.mod input[type=range]{ background:var(--accent-soft); }
+
+/* ---- 裁剪框 ---- */
+.crop-box{ position:absolute; inset:14% 20%; border:1.5px solid var(--accent); box-shadow:0 0 0 9999px rgba(8,12,20,.5); display:none; z-index:5; pointer-events:none; }
+.crop-box.show{ display:block; }
+.crop-box .gl{ position:absolute; inset:0;
+  background-image:
+    linear-gradient(90deg,transparent 33.3%,rgba(255,255,255,.55) 33.3%,rgba(255,255,255,.55) 33.5%,transparent 33.5%,transparent 66.5%,rgba(255,255,255,.55) 66.5%,rgba(255,255,255,.55) 66.7%,transparent 66.7%),
+    linear-gradient(180deg,transparent 33.3%,rgba(255,255,255,.55) 33.3%,rgba(255,255,255,.55) 33.5%,transparent 33.5%,transparent 66.5%,rgba(255,255,255,.55) 66.5%,rgba(255,255,255,.55) 66.7%,transparent 66.7%); }
+.crop-box .h{ position:absolute; width:11px;height:11px;background:var(--accent); border:2px solid #fff; border-radius:3px; }
+.h.tl{left:-7px;top:-7px}.h.tr{right:-7px;top:-7px}.h.bl{left:-7px;bottom:-7px}.h.br{right:-7px;bottom:-7px}
+.crop-size{ position:absolute; left:50%; bottom:-32px; transform:translateX(-50%); background:var(--bg-elev); border:1px solid var(--border);
+  border-radius:7px; padding:3px 9px; font-size:11.5px; color:var(--text-2); white-space:nowrap; box-shadow:var(--shadow-1); }
+
+/* ---- 右键 / 溢出菜单 ---- */
+.ctx-menu{ position:absolute; z-index:60; min-width:224px; background:var(--bg-elev); border:1px solid var(--border-2);
+  border-radius:10px; box-shadow:var(--shadow-2); padding:6px; display:none; }
+.ctx-menu.show{ display:block; }
+.ctx-item{ display:flex; align-items:center; gap:9px; padding:6px 9px; border-radius:7px; font-size:12.5px; color:var(--text-2); cursor:default; }
+.ctx-item:hover{ background:var(--accent); color:#fff; }
+[data-theme="dark"] .ctx-item:hover{ color:#0e1116; }
+.ctx-item .k{ margin-left:auto; font-size:11px; opacity:.65; }
+.ctx-item .ic{ width:15px; text-align:center; flex:0 0 auto; }
+.ctx-sep{ height:1px; background:var(--border); margin:5px 4px; }
+
+.screen{ display:none !important; }
+.screen.on{ display:flex !important; }
+.off{ display:none !important; }
+</style>
+</head>
+<body>
+<div class="stage">
+<div class="wrap">
+
+  <!-- ===== 页面头部 ===== -->
+  <div class="page-top">
+    <div class="brand-mark">
+      <div class="logo-badge">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M4 5.5C4 4.67 4.67 4 5.5 4h13c.83 0 1.5.67 1.5 1.5v13c0 .83-.67 1.5-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-13Z" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="9.5" r="1.6" fill="currentColor"/><path d="M5 17l4.2-4.6 3.1 3 3-3.5L19 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </div>
+      <div>
+        <div class="page-title">Rat看图王 · 交互设计稿</div>
+        <div class="page-sub">Electron + 自研渲染内核 · 支持 CDR / AI / EPS / PSD / RAW 的本地极速看图器</div>
+      </div>
+    </div>
+    <div class="top-spacer"></div>
+    <div class="seg" id="themeSeg">
+      <button data-t="light" class="on">☀ 白天</button>
+      <button data-t="dark">🌙 黑夜</button>
+    </div>
+    <div class="seg">
+      <button id="noteToggle">◎ 设计标注</button>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span>1440 × 860 参考尺寸</span>
+    <span>双主题：Light 默认 / Dark</span>
+    <span>4 大场景：看图 · 管理 · 对比 · 批量</span>
+    <span>轻量路线：主包仅内置基础位图，不做专业编辑</span>
+  </div>
+
+  <!-- ===== 应用窗口 ===== -->
+  <div class="app" id="app" data-screen="view">
+
+    <!-- 标题栏 -->
+    <div class="titlebar">
+      <div class="tb-logo">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M4 5.5C4 4.67 4.67 4 5.5 4h13c.83 0 1.5.67 1.5 1.5v13c0 .83-.67 1.5-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-13Z" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="9.5" r="1.6" fill="currentColor"/><path d="M5 17l4.2-4.6 3.1 3 3-3.5L19 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="tb-title" id="tbTitle">IMG_2841.CR3</div>
+      <div class="tabs" id="tabs"></div>
+      <div class="tab-add" title="新建标签页">＋</div>
+      <div class="tb-search">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input placeholder="搜索文件、标签、EXIF…  Ctrl+F" />
+      </div>
+      <div class="winbtns">
+        <button class="winbtn">─</button>
+        <button class="winbtn">□</button>
+        <button class="winbtn close">✕</button>
+      </div>
+    </div>
+
+    <!-- 菜单栏 -->
+    <div class="menubar">
+      <div class="item">文件</div><div class="item">编辑</div><div class="item">视图</div><div class="item">图像</div>
+      <div class="item">工具</div><div class="item">批量</div><div class="item">帮助</div>
+      <div class="right">
+        <span>渲染引擎：Skia(GPU)</span>
+        <span>·</span>
+        <span>解码线程 ×8</span>
+      </div>
+    </div>
+
+    <!-- 主体 -->
+    <div class="body">
+
+      <!-- 左侧导航 -->
+      <div class="rail" id="rail">
+        <button class="rail-btn on" data-screen="view" title="看图（单图）">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2.5" stroke="currentColor" stroke-width="1.7"/><circle cx="8.5" cy="9.5" r="1.7" fill="currentColor"/><path d="M4 17l4.5-5 3.3 3.2 3-3.6L20 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </button>
+        <button class="rail-btn" data-screen="manage" title="管理（网格浏览）">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6" stroke="currentColor" stroke-width="1.7"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6" stroke="currentColor" stroke-width="1.7"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6" stroke="currentColor" stroke-width="1.7"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6" stroke="currentColor" stroke-width="1.7"/></svg>
+        </button>
+        <button class="rail-btn" data-screen="compare" title="对比（双图比对）">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M12 4v16" stroke="currentColor" stroke-width="1.7"/></svg>
+        </button>
+        <button class="rail-btn" data-screen="batch" title="批量处理">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M4 7h11M4 12h16M4 17h11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="19" cy="7" r="2" stroke="currentColor" stroke-width="1.6"/></svg>
+        </button>
+        <button class="rail-btn" data-screen="settings" title="设置">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/><path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </button>
+        <div class="rail-sp"></div>
+        <button class="rail-btn" title="收藏夹">★</button>
+        <button class="rail-btn" title="回收站">🗑</button>
+      </div>
+
+      <!-- ============ 屏幕 1：看图 ============ -->
+      <div class="body-inner screen on" id="screen-view" style="flex:1;min-width:0;display:flex;">
+
+        <!-- 文件树 -->
+        <div class="side">
+          <div class="side-head">资源管理器</div>
+          <div class="tree">
+            <div class="tnode">📁 <span>素材库</span><span class="cnt">1,284</span></div>
+            <div class="tnode sel ind-2">🖼 <span>风景 / 川西</span><span class="cnt">86</span></div>
+            <div class="tnode ind-2">🖼 <span>人像 / 2026春</span><span class="cnt">212</span></div>
+            <div class="tnode ind-2">🎨 <span>矢量源文件</span><span class="cnt">37</span></div>
+            <div class="tnode">📁 <span>客户交付</span><span class="cnt">410</span></div>
+            <div class="tnode">📁 <span>截屏</span><span class="cnt">903</span></div>
+            <div class="side-head" style="padding:12px 8px 4px">智能集合</div>
+            <div class="tnode">⭐ <span>收藏</span><span class="cnt">24</span></div>
+            <div class="tnode">🔴 <span>红色旅</span><span class="cnt">58</span></div>
+            <div class="tnode">📷 <span>RAW 未处理</span><span class="cnt">173</span></div>
+            <div class="tnode">🎨 <span>矢量 / CDR</span><span class="cnt">41</span></div>
+          </div>
+          <div class="side-foot">
+            <div class="meterline"><span>解码缓存</span><span class="bar"><i style="width:63%"></i></span><span>1.2G</span></div>
+            <div class="meterline"><span>内存占用</span><span class="bar"><i style="width:38%"></i></span><span>284M</span></div>
+            <div>GPU：RTX 显卡 · 硬件加速已启用</div>
+          </div>
+        </div>
+
+        <!-- 画布 -->
+        <div class="canvas-wrap">
+          <!-- 工具栏 -->
+          <div class="toolbar">
+            <button class="tbtn icon" title="打开 Ctrl+O">📂</button>
+            <button class="tbtn icon" id="undoBtn" title="撤销 Ctrl+Z" disabled>↶</button>
+            <button class="tbtn icon" id="redoBtn" title="重做 Ctrl+Y" disabled>↷</button>
+            <div class="tsep"></div>
+            <button class="tbtn icon" id="prevBtn" title="上一张 ←">◀</button>
+            <button class="tbtn icon" id="nextBtn" title="下一张 →">▶</button>
+            <div class="tsep"></div>
+            <div class="zoom-group">
+              <button class="tbtn icon" id="zoomOut">−</button>
+              <span class="zoom-val" id="zoomVal">64%</span>
+              <button class="tbtn icon" id="zoomIn">＋</button>
+            </div>
+            <button class="tbtn" id="fitBtn">适应</button>
+            <button class="tbtn" id="oneBtn">1:1</button>
+            <div class="tsep"></div>
+            <button class="tbtn icon" id="rotL" title="左旋 90°">↺</button>
+            <button class="tbtn icon" id="rotR" title="右旋 90°">↻</button>
+            <div class="tsep"></div>
+            <button class="tbtn" id="cropBtn">✂ 裁剪</button>
+            <button class="tbtn" id="adjustBtn">⚙ 调整</button>
+            <button class="tbtn" id="lensBtn">🔍 放大镜</button>
+            <div class="tsep"></div>
+            <button class="tbtn icon" title="收藏 Ctrl+D">☆</button>
+            <button class="tbtn icon" id="copyClip" title="复制图片到剪贴板 Ctrl+C">⧉</button>
+            <button class="tbtn icon" id="moreBtn" title="更多操作（与右键菜单同源）">⋮</button>
+            <div class="tsep"></div>
+            <button class="tbtn primary" id="toBatch">⇄ 批量</button>
+          </div>
+
+          <!-- 视口 -->
+          <div class="viewport" id="viewport">
+            <div class="checker" id="stage-img"></div>
+
+            <!-- 裁剪浮层：默认隐藏，点工具栏「裁剪」出现 -->
+            <div class="crop-box" id="cropBox">
+              <div class="gl"></div>
+              <span class="h tl"></span><span class="h tr"></span><span class="h bl"></span><span class="h br"></span>
+              <span class="crop-size" id="cropSize">自由裁剪 · 拖动边角调整</span>
+            </div>
+            <div class="floating float-tc off" id="ratioRow">
+              <span class="pill-bar">
+                <span class="lbl">比例</span>
+                <button class="tbtn on" data-r="free">自由</button>
+                <button class="tbtn" data-r="1:1">1:1</button>
+                <button class="tbtn" data-r="4:3">4:3</button>
+                <button class="tbtn" data-r="16:9">16:9</button>
+                <button class="tbtn" data-r="orig">原图</button>
+                <span class="lbl">|</span>
+                <button class="tbtn" id="cropCancel">取消</button>
+                <button class="tbtn" id="cropApply" style="color:var(--accent);font-weight:700">应用裁剪</button>
+              </span>
+            </div>
+
+
+            <div class="floating float-tl">
+              <span class="pill cdr" id="enginePill">◆ 矢量引擎 · CDR2019</span>
+              <span class="pill">超采样 <b id="ssVal">4×</b></span>
+            </div>
+            <div class="floating float-tr">
+              <span class="pill">🖐 抓手 (空格)</span>
+              <span class="pill">🔍 <b>Alt</b> 拾色</span>
+            </div>
+            <div class="floating float-bl">
+              <span class="pill">Cb <b id="cbVal">sRGB</b></span>
+              <span class="pill">位深 <b id="bitVal">8bit</b></span>
+              <span class="pill" id="alphaPill">通道 <b>RGBA</b></span>
+            </div>
+            <div class="floating float-br">
+              <span class="pill" id="perfPill">解码 <b id="decVal">18 ms</b> · 显存 <b id="gpuVal">42 MB</b></span>
+            </div>
+
+            <div class="nav-arrow l" id="arrowPrev">‹</div>
+            <div class="nav-arrow r" id="arrowNext">›</div>
+
+            <!-- 放大镜：跟随鼠标的 2× 取景器（看图常用） -->
+            <div class="zoom-lens" id="viewLens"></div>
+          </div>
+
+          <!-- 胶片条 -->
+          <div class="filmstrip" id="filmstrip"></div>
+        </div>
+
+        <!-- 属性面板 -->
+        <div class="inspector">
+          <div class="insp-tabs">
+            <div class="insp-tab on">信息</div>
+            <div class="insp-tab">EXIF</div>
+            <div class="insp-tab">直方图</div>
+            <div class="insp-tab">颜色</div>
+          </div>
+          <div class="insp-body">
+            <div class="sec" id="adjSection">
+              <div class="sec-h">轻量调整 <span class="line"></span></div>
+              <div id="adjList"></div>
+              <div class="btn-row" style="flex-wrap:wrap;gap:6px;margin-top:8px">
+                <button class="btn" id="autoBtn">✨ 一键美化</button>
+                <button class="btn" id="resetBtn">重置</button>
+              </div>
+              <div style="font-size:11.5px;color:var(--text-3);margin-top:8px;line-height:1.6">只记参数、不改原文件；导出时才应用。专业调色请用外部工具，本产品不做。</div>
+            </div>
+            <div class="sec">
+              <div class="sec-h">文件 <span class="line"></span></div>            <div class="sec">
+              <div class="sec-h">文件 <span class="line"></span></div>
+              <div class="kv"><span class="k">名称</span><span class="v" id="iName">IMG_2841.CR3</span></div>
+              <div class="kv"><span class="k">类型</span><span class="v" id="iType">Canon RAW (CR3)</span></div>
+              <div class="kv"><span class="k">体积</span><span class="v" id="iSize">31.8 MB</span></div>
+              <div class="kv"><span class="k">尺寸</span><span class="v mono" id="iDim">6000 × 4000</span></div>
+              <div class="kv"><span class="k">路径</span><span class="v mono" id="iPath">D:\素材库\风景\川西\</span></div>
+            </div>
+
+            <div class="sec">
+              <div class="sec-h">拍摄参数 <span class="line"></span></div>
+              <div class="kv"><span class="k">相机</span><span class="v" id="eCam">Canon EOS R6</span></div>
+              <div class="kv"><span class="k">镜头</span><span class="v" id="eLens">RF 24-70mm F2.8 L</span></div>
+              <div class="kv"><span class="k">光圈</span><span class="v" id="eAp">f/8.0</span></div>
+              <div class="kv"><span class="k">快门</span><span class="v" id="eSh">1/250 s</span></div>
+              <div class="kv"><span class="k">ISO</span><span class="v" id="eIso">200</span></div>
+              <div class="kv"><span class="k">焦距</span><span class="v" id="eFl">35 mm</span></div>
+              <div class="kv"><span class="k">时间</span><span class="v" id="eDate">2026-08-14 18:42</span></div>
+            </div>
+
+            <div class="sec">
+              <div class="sec-h">直方图 <span class="line"></span></div>
+              <svg class="histo" viewBox="0 0 260 86" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="hg1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="var(--accent)" stop-opacity=".55"/>
+                    <stop offset="100%" stop-color="var(--accent)" stop-opacity=".05"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0 86 L0 74 Q18 62 32 52 T62 40 T96 34 T128 30 T160 36 T196 46 T228 62 T260 80 L260 86 Z" fill="url(#hg1)"/>
+                <path d="M0 86 L0 82 Q26 78 52 70 T104 56 T156 52 T208 64 T260 82 L260 86 Z" fill="var(--text-3)" opacity=".28"/>
+                <path d="M0 86 L0 84 Q30 80 60 74 T120 62 T180 66 T240 78 T260 84 L260 86 Z" fill="var(--warn)" opacity=".3"/>
+                <g stroke="var(--border-2)" stroke-width="1">
+                  <line x1="65" y1="0" x2="65" y2="86"/><line x1="130" y1="0" x2="130" y2="86"/><line x1="195" y1="0" x2="195" y2="86"/>
+                </g>
+              </svg>
+            </div>
+
+            <div class="sec">
+              <div class="sec-h">主色板 <span class="line"></span></div>
+              <div class="swatches">
+                <div class="sw" style="background:#2b3a55"></div>
+                <div class="sw" style="background:#4d6b8a"></div>
+                <div class="sw" style="background:#8fb2c9"></div>
+                <div class="sw" style="background:#e8d9a8"></div>
+                <div class="sw" style="background:#c9762f"></div>
+                <div class="sw" style="background:#f4efe6"></div>
+              </div>
+              <div class="eyedropper">
+                <span class="color-dot" id="pickDot" style="background:#8fb2c9"></span>
+                <span id="pickTxt">#8FB2C9 · HSB(205,41,79)</span>
+              </div>
+            </div>
+
+            <div class="sec">
+              <div class="sec-h">标签 <span class="line"></span></div>
+              <div class="tag-chips">
+                <span class="chip">川西</span><span class="chip">风景</span><span class="chip">RAW</span><span class="chip add">＋ 添加</span>
+              </div>
+            </div>
+
+            <div class="sec">
+              <div class="sec-h">操作 <span class="line"></span></div>
+              <div class="btn-row">
+                <button class="btn">导出…</button>
+                <button class="btn">在资源管理器显示</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ 屏幕 3：管理（网格） ============ -->
+      <div class="body-inner screen" id="screen-manage" style="flex:1;min-width:0;display:flex;">
+        <div class="side">
+          <div class="side-head">资源管理器</div>
+          <div class="tree">
+            <div class="tnode">📁 <span>素材库</span><span class="cnt">1,284</span></div>
+            <div class="tnode sel ind-2">🖼 <span>风景 / 川西</span><span class="cnt">86</span></div>
+            <div class="tnode ind-2">🖼 <span>人像 / 2026春</span><span class="cnt">212</span></div>
+            <div class="tnode ind-2">🎨 <span>矢量源文件</span><span class="cnt">37</span></div>
+            <div class="side-head" style="padding:12px 8px 4px">筛选（即时生效）</div>
+            <div class="tag-chips" style="padding:4px 6px">
+              <span class="chip">全部 1284</span><span class="chip">JPG 620</span><span class="chip">PNG 214</span><span class="chip">矢量 41</span><span class="chip">RAW 173</span><span class="chip">动图 66</span>
+            </div>
+          </div>
+          <div class="side-foot"><div>已索引 <b id="idxCnt">1284</b> 个文件 · 索引耗时 2.4 s</div></div>
+        </div>
+
+        <div class="grid-screen">
+          <div class="grid-tools">
+            <strong style="color:var(--text)">川西</strong>
+            <span>86 项 · 已选 3</span>
+            <div class="tsep"></div>
+            <select class="select"><option>排序：拍摄时间 ↓</option><option>文件名</option><option>体积</option><option>色彩相近</option></select>
+            <select class="select"><option>缩放：中 (158px)</option><option>小</option><option>大</option><option>列表模式</option></select>
+            <div class="tsep"></div>
+            <button class="tbtn">⟳ 重建索引</button>
+            <button class="tbtn">🔍 以图搜图</button>
+            <button class="tbtn">⚡ AI 打标</button>
+            <div style="margin-left:auto"></div>
+            <button class="btn">导入</button>
+            <button class="btn primary">批量转换</button>
+          </div>
+          <div class="grid-scroll"><div class="grid" id="grid"></div></div>
+        </div>
+      </div>
+
+      <!-- ============ 屏幕 4：对比 ============ -->
+      <div class="body-inner screen" id="screen-compare" style="flex:1;min-width:0;display:flex;">
+        <div class="side">
+          <div class="side-head">对照来源</div>
+          <div class="tree">
+            <div class="tnode">🖼 <span>IMG_2841.CR3（原图）</span></div>
+            <div class="tnode">🖼 <span>IMG_2841_调整后.JPG</span></div>
+            <div class="tnode sel">🎨 <span>海报_v7.CDR</span></div>
+            <div class="tnode">🎨 <span>海报_v8.CDR</span></div>
+            <div class="side-head" style="padding:12px 8px 4px">比对模式</div>
+            <div class="tag-chips" style="padding:4px 6px">
+              <span class="chip">分割</span><span class="chip">差值</span><span class="chip">叠加</span><span class="chip">并排</span><span class="chip">闪烁 A/B</span>
+            </div>
+          </div>
+          <div class="side-foot">
+            <div class="meterline"><span>像素差异</span><span class="bar"><i style="width:12%"></i></span><span>1.9%</span></div>
+            <div>平均 ΔE = <b id="deVal">0.8</b>（肉眼不可辨）</div>
+          </div>
+        </div>
+
+        <div class="cmp-screen">
+          <div class="grid-tools">
+            <span>A / B 分割对比</span>
+            <div class="tsep"></div>
+            <span style="color:var(--text-3)">拖动滑块或移动鼠标查看差异</span>
+            <div class="tsep"></div>
+            <input type="range" id="splitRange" min="0" max="100" value="50" />
+            <span class="range-val" id="splitVal">50%</span>
+            <div style="margin-left:auto"></div>
+            <button class="tbtn">⇄ 交换</button>
+            <button class="tbtn">🔒 同步缩放</button>
+            <button class="tbtn">导出差异图</button>
+          </div>
+          <div class="cmp-body" id="cmpBody">
+            <div class="cmp-pane a" id="cmpA" style="--split:50%"></div>
+            <div class="cmp-pane" id="cmpB"></div>
+            <div class="cmp-label a">A · 海报_v7.CDR</div>
+            <div class="cmp-label b">B · 海报_v8.CDR</div>
+            <div class="cmp-handle" style="--split:50%"></div>
+            <div class="zoom-lens" id="lens"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ 屏幕 5：批量处理（轻量：只做批量另存/转码） ============ -->
+      <div class="body-inner screen" id="screen-batch" style="flex:1;min-width:0;display:flex;">
+        <div class="side">
+          <div class="side-head">队列</div>
+          <div class="tree">
+            <div class="tnode sel">🔄 <span>进行中</span><span class="cnt">2</span></div>
+            <div class="tnode">✅ <span>已完成</span><span class="cnt">418</span></div>
+            <div class="tnode">⚠ <span>失败</span><span class="cnt">1</span></div>
+            <div class="side-head" style="padding:12px 8px 4px">常用预设</div>
+            <div class="tag-chips" style="padding:4px 6px">
+              <span class="chip">JPG 压缩 80%</span><span class="chip">统一转 WebP</span><span class="chip">PNG 限制长边 1920</span><span class="chip">CDR → PNG 2x</span>
+            </div>
+          </div>
+          <div class="side-foot">
+            <div class="meterline"><span>总进度</span><span class="bar"><i style="width:78%"></i></span><span>78%</span></div>
+            <div>吞吐 <b>14.6 张/秒</b> · 预计剩余 00:12</div>
+          </div>
+        </div>
+
+        <div class="batch-screen">
+          <div class="grid-tools">
+            <strong style="color:var(--text)">批量另存 / 转码</strong>
+            <span>423 项</span>
+            <div class="tsep"></div>
+            <button class="tbtn">▶ 继续</button>
+            <button class="tbtn">⏸ 暂停</button>
+            <button class="tbtn">＋ 添加文件</button>
+            <div style="margin-left:auto"></div>
+            <button class="btn primary">开始</button>
+          </div>
+          <div class="batch-body">
+            <div class="set-card" style="margin-bottom:14px">
+              <h4>输出设置</h4>
+              <p class="desc">三项参数搞定 90% 需求；不做色彩管线、不做尺寸裁剪、不做水印。</p>
+              <div class="row"><div class="label"><div class="l1">目标格式</div><div class="l2">源为 CDR/AI/EPS 时按倍率光栅化</div></div>
+                <select class="select" title="转出目标格式">
+                  <option>保持原格式（仅压缩）</option>
+                  <option>JPG</option><option>PNG</option><option>WebP</option><option>AVIF</option>
+                  <option>CDR → PNG</option><option>HEIC → JPG</option><option>RAW → JPG</option>
+                </select></div>
+              <div class="row"><div class="label"><div class="l1">质量 / 倍率</div><div class="l2">JPG 质量或矢量输出倍率</div></div>
+                <input type="range" min="1" max="100" value="82" /><span class="range-val">82</span></div>
+              <div class="row"><div class="label"><div class="l1">限制长边</div><div class="l2">等比缩放，不拉伸；0 表示不限制</div></div>
+                <input type="range" min="0" max="8192" value="1920" step="256" /><span class="range-val">1920 px</span></div>
+            </div>
+            <table class="table">
+              <thead><tr><th style="width:38%">文件</th><th>源 → 目标</th><th>尺寸</th><th>进度</th><th>状态</th><th>耗时</th></tr></thead>
+              <tbody id="batchRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ 屏幕 6：设置 ============ -->
+      <div class="body-inner screen" id="screen-settings" style="flex:1;min-width:0;display:flex;">
+        <div class="set-nav">
+          <div style="padding:6px 10px 10px;font-size:17px;font-weight:700;color:var(--text)">设置</div>
+          <div class="set-nav-item on">外观</div>
+          <div class="set-nav-item">性能</div>
+          <div class="set-nav-item">格式支持</div>
+          <div class="set-nav-item">快捷键</div>
+          <div class="set-nav-item">缓存</div>
+          <div class="set-nav-item">关于</div>
+        </div>
+        <div class="set-body">
+          <div class="set-card">
+            <h4>主题</h4>
+            <p class="desc">默认跟随白天主题；可设为跟随系统或自定义强调色。</p>
+            <div class="row">
+              <div class="label"><div class="l1">界面主题</div></div>
+              <div class="seg" id="themeSeg2" style="background:var(--bg-sunken)">
+                <button data-t="light" class="on">☀ 白天</button>
+                <button data-t="dark">🌙 黑夜</button>
+                <button data-t="auto">◐ 跟随系统</button>
+              </div>
+            </div>
+            <div class="row">
+              <div class="label"><div class="l1">强调色</div><div class="l2">用于选中、滑块、焦点环</div></div>
+              <div style="display:flex;gap:8px">
+                <span style="width:22px;height:22px;border-radius:50%;background:#3d6bf5;outline:2px solid var(--accent);outline-offset:2px"></span>
+                <span style="width:22px;height:22px;border-radius:50%;background:#8b5cf6"></span>
+                <span style="width:22px;height:22px;border-radius:50%;background:#12a150"></span>
+                <span style="width:22px;height:22px;border-radius:50%;background:#e0518a"></span>
+                <span style="width:22px;height:22px;border-radius:50%;background:#d98026"></span>
+              </div>
+            </div>
+            <div class="row">
+              <div class="label"><div class="l1">画布背景</div><div class="l2">透明通道用棋盘格显示</div></div>
+              <div class="switch on"><i></i></div>
+            </div>
+          </div>
+
+          <div class="set-card">
+            <h4>性能</h4>
+            <p class="desc">轻量优先：冷启动 &lt; 1.2 s、4K 图 &lt; 60 ms 上屏、常驻内存 &lt; 180 MB、安装包 &lt; 25 MB（只内置基础位图）。</p>
+            <div class="row"><div class="label"><div class="l1">GPU 硬件加速</div><div class="l2">Skia / D3D11 纹理上传</div></div><div class="switch on"><i></i></div></div>
+            <div class="row"><div class="label"><div class="l1">解码线程数</div><div class="l2">跟随 CPU 核心自动分配</div></div><input type="range" min="1" max="16" value="8" /><span class="range-val">8 线程</span></div>
+            <div class="row"><div class="label"><div class="l1">预加载策略</div><div class="l2">前后各 N 张预解码，翻页零等待</div></div><select class="select"><option>关闭</option><option>前后 1 张</option><option selected>前后 3 张</option><option>整目录智能预取</option></select></div>
+            <div class="row"><div class="label"><div class="l1">超大图分块加载</div><div class="l2">&gt; 100 MP 图启用瓦片金字塔（P2 可选）</div></div><div class="switch on"><i></i></div></div>
+            <div class="row"><div class="label"><div class="l1">矢量超采样</div><div class="l2">CDR / AI / PDF 抗锯齿倍率</div></div><input type="range" min="1" max="8" value="4" /><span class="range-val">4×</span></div>
+            <div class="row"><div class="label"><div class="l1">插件按需加载</div><div class="l2">RAW / HEIC / JXL 解析器等首次遇到该格式时才加载，主包不受影响</div></div><div class="switch on"><i></i></div></div>
+          </div>
+
+          <div class="set-card">
+            <h4>格式支持矩阵</h4>
+            <p class="desc">
+              <b id="fmtStat">—</b>。JPG / PNG / WebP / BMP / GIF / TIFF 等<strong>基础位图编入主包、零外部依赖</strong>，装完即用；
+              专业位图与矢量走按需加载的解析插件。矢量格式全程不走外部程序转码。
+            </p>
+            <div id="fmtMatrix"></div>
+          </div>
+
+          <div class="set-card">
+            <h4>快捷键</h4>
+            <p class="desc">遵循系统习惯，可在「快捷键」页全部重绑定。</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 22px;font-size:12.5px;color:var(--text-2)">
+              <div class="kv"><span class="k">← / →</span><span class="v">上一张 / 下一张</span></div>
+              <div class="kv"><span class="k">空格</span><span class="v">抓手拖动</span></div>
+              <div class="kv"><span class="k">+ / −</span><span class="v">缩放</span></div>
+              <div class="kv"><span class="k">Alt+滚轮</span><span class="v">以光标为中心缩放</span></div>
+              <div class="kv"><span class="k">数字 0 / 1</span><span class="v">适应窗口 / 1:1</span></div>
+              <div class="kv"><span class="k">C</span><span class="v">裁剪（Esc 取消）</span></div>
+              <div class="kv"><span class="k">L</span><span class="v">放大镜</span></div>
+              <div class="kv"><span class="k">Ctrl+Z / Ctrl+Y</span><span class="v">撤销 / 重做</span></div>
+              <div class="kv"><span class="k">F5 / F11</span><span class="v">幻灯片 / 全屏</span></div>
+              <div class="kv"><span class="k">Ctrl+Shift+C</span><span class="v">复制文件路径</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /body -->
+
+    <!-- 标注层 -->
+    <div class="notes" id="notes">
+      <div class="note" style="left:20%;top:12%"><span class="pin">1</span><span class="pop"><b>多标签页</b>同时挂载不同文件（含不同矢量 source），切换不重新解码。</span></div>
+      <div class="note" style="left:33%;top:44%"><span class="pin">2</span><span class="pop"><b>矢量 / RAW 引擎标识</b>显示当前使用的解析器与超采样倍率。</span></div>
+      <div class="note" style="left:52%;top:26%"><span class="pin">3</span><span class="pop"><b>悬浮工具</b>缩略图、拾色、色彩空间、位深常驻，不遮挡画面。</span></div>
+      <div class="note" style="left:60%;top:57%"><span class="pin">4</span><span class="pop"><b>性能读数</b>实时解码耗时与显存，便于调优。</span></div>
+      <div class="note" style="left:75%;top:33%"><span class="pin">5</span><span class="pop"><b>属性面板</b>文件/EXIF/直方图/主色板四合一，可停靠或收起。</span></div>
+      <div class="note" style="left:44%;top:78%"><span class="pin">6</span><span class="pop"><b>胶片条</b>预解码缩略图，横向无限滚动。</span></div>
+    </div>
+
+    <!-- 右键菜单 / 更多操作 -->
+    <div class="ctx-menu" id="ctxMenu"></div>
+
+    <!-- 状态栏 -->
+    <div class="statusbar">
+      <span class="s">📄 <b id="sbName">IMG_2841.CR3</b></span>
+      <span class="s"><b id="sbDim">6000×4000</b></span>
+      <span class="s"><b id="sbSize">31.8 MB</b></span>
+      <span class="s">缩放 <b id="sbZoom">64%</b></span>
+      <span class="s">sRGB · 8bit</span>
+      <span class="s">操作 <b id="sbOp">—</b></span>
+      <span class="s sp" id="sbRight">就绪 · 川西 23/86</span>
+    </div>
+    </div>
+  </div><!-- /app -->
+
+  <div class="page-foot">
+    <strong>设计说明：</strong>本稿为 1440×860 参考布局，实际 Electron 窗口最小尺寸 1024×680，所有面板均可折叠。
+    主题通过 CSS 变量 <code>data-theme</code> 切换，实际产品由 <code>nativeTheme.themeSource</code> 驱动，默认 <code>light</code>。<br>
+    <strong>试一下：</strong>拖右侧「轻量调整」的滑块，画布实时变化（只记参数、原文件不动）；点工具栏「✂ 裁剪」出现裁剪框与比例条，
+    用 <code>Esc</code> 退出；「⋮」或画布右键是完整操作菜单；<code>Ctrl+Z</code> / <code>Ctrl+Y</code> 撤销重做，状态栏右下角实时显示当前步。<br>
+    <strong>范围说明：</strong>本产品定位<strong>轻量看图</strong> —— 不做图层编辑、AI 抠图、长图拼接、专业调色与画布尺寸裁剪，这些交给外部工具。
+    保留的是看图必需的：浏览与缩放、旋转翻转、非破坏性裁剪、轻量调整、格式转换与批量另存。
+  </div>
+
+</div>
+</div>
+
+<script>
+/* =========================================================
+   数据 & 场景
+   ========================================================= */
+const SCENES = {
+  landscape:`<svg width="880" height="586" viewBox="0 0 880 586" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1e3a63"/><stop offset="55%" stop-color="#5c7ea8"/><stop offset="100%" stop-color="#e6b678"/></linearGradient>
+      <linearGradient id="far" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b6f8c"/><stop offset="100%" stop-color="#3d4f6b"/></linearGradient>
+      <linearGradient id="mid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a4a63"/><stop offset="100%" stop-color="#222d40"/></linearGradient>
+      <linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c89357"/><stop offset="40%" stop-color="#6d7f95"/><stop offset="100%" stop-color="#2b3648"/></linearGradient>
+    </defs>
+    <rect width="880" height="586" fill="url(#sky)"/>
+    <circle cx="640" cy="150" r="42" fill="#fff2cf" opacity=".92"/>
+    <circle cx="640" cy="150" r="86" fill="#ffe6ad" opacity=".18"/>
+    <path d="M0 300 L110 226 L190 286 L268 214 L360 300 Z" fill="url(#far)"/>
+    <path d="M300 322 L420 214 L520 300 L610 236 L700 322 Z" fill="url(#far)" opacity=".9"/>
+    <path d="M0 356 L150 250 L260 340 L380 246 L520 356 Z" fill="url(#mid)"/>
+    <path d="M480 360 L620 262 L742 352 L820 300 L880 360 Z" fill="url(#mid)"/>
+    <rect y="356" width="880" height="230" fill="url(#water)"/>
+    <g opacity=".28" fill="#ffffff">
+      <rect x="120" y="410" width="240" height="2"/><rect x="420" y="440" width="300" height="2"/>
+      <rect x="60" y="478" width="360" height="2"/><rect x="500" y="510" width="260" height="2"/>
+    </g>
+    <path d="M0 356 L150 250 L260 340 L380 246 L520 356 Z" opacity=".18" fill="#0d1420" transform="translate(0,356) scale(1,-1) translate(0,-356)"/>
+  </svg>`,
+  cdrPoster:`<svg width="880" height="586" viewBox="0 0 880 586" xmlns="http://www.w3.org/2000/svg">
+    <rect width="880" height="586" fill="#f4efe6"/>
+    <circle cx="640" cy="150" r="150" fill="#e8503a" opacity=".92"/>
+    <rect x="80" y="90" width="300" height="300" fill="#1b2a4a"/>
+    <path d="M80 90 L380 390 L80 390 Z" fill="#3d6bf5" opacity=".85"/>
+    <circle cx="230" cy="240" r="70" fill="none" stroke="#f4efe6" stroke-width="3"/>
+    <text x="80" y="470" font-family="Segoe UI, sans-serif" font-size="72" font-weight="800" fill="#1b2a4a">CORE</text>
+    <text x="80" y="530" font-family="Segoe UI, sans-serif" font-size="20" letter-spacing="6" fill="#6b7280">VECTOR POSTER / A3 · 300DPI</text>
+    <g stroke="#1b2a4a" stroke-width="2" opacity=".5">
+      <line x1="430" y1="300" x2="860" y2="300" stroke-dasharray="8 6"/>
+      <line x1="430" y1="340" x2="860" y2="340" stroke-dasharray="8 6"/>
+    </g>
+    <path d="M600 400 q80 -60 160 0 q-80 60 -160 0 Z" fill="#12a150"/>
+    <rect x="600" y="440" width="160" height="6" fill="#1b2a4a"/>
+    <text x="600" y="480" font-family="Consolas, monospace" font-size="15" fill="#6b7280">CMYK · CDREL.VER2019</text>
+  </svg>`,
+  portrait:`<svg width="600" height="800" viewBox="0 0 600 800" xmlns="http://www.w3.org/2000/svg">
+    <defs><radialGradient id="bgp" cx="50%" cy="38%" r="62%"><stop offset="0" stop-color="#4a5568"/><stop offset="100%" stop-color="#1a202c"/></radialGradient>
+    <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8bd93"/><stop offset="100%" stop-color="#c08963"/></linearGradient></defs>
+    <rect width="600" height="800" fill="url(#bgp)"/>
+    <ellipse cx="300" cy="470" rx="200" ry="230" fill="#2d3748"/>
+    <ellipse cx="300" cy="270" rx="86" ry="102" fill="url(#skin)"/>
+    <path d="M214 258 q86 -86 172 0 q0 -92 -86 -92 q-86 0 -86 92 Z" fill="#2b2018"/>
+    <ellipse cx="272" cy="272" rx="9" ry="6" fill="#2b2018"/><ellipse cx="328" cy="272" rx="9" ry="6" fill="#2b2018"/>
+    <path d="M270 330 q30 22 60 0" stroke="#8a5a44" stroke-width="4" fill="none" stroke-linecap="round"/>
+  </svg>`,
+  logoV:`<svg width="586" height="586" viewBox="0 0 586 586" xmlns="http://www.w3.org/2000/svg">
+    <rect width="586" height="586" fill="#ffffff"/>
+    <circle cx="293" cy="293" r="180" fill="#8b5cf6" opacity=".95"/>
+    <path d="M173 293 L293 173 L413 293 L293 413 Z" fill="#ffffff" opacity=".96"/>
+    <circle cx="293" cy="293" r="60" fill="#8b5cf6"/>
+    <text x="293" y="520" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="34" font-weight="700" fill="#1b2a4a">RAT / 矢量</text>
+  </svg>`,
+  city:`<svg width="880" height="586" viewBox="0 0 880 586" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="night" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1226"/><stop offset="70%" stop-color="#26345c"/><stop offset="100%" stop-color="#6b4a72"/></linearGradient></defs>
+    <rect width="880" height="586" fill="url(#night)"/>
+    <g fill="#0f1830"><rect x="60" y="280" width="90" height="300"/><rect x="170" y="200" width="70" height="380"/>
+      <rect x="260" y="330" width="110" height="250"/><rect x="390" y="150" width="86" height="430"/>
+      <rect x="496" y="290" width="70" height="290"/><rect x="586" y="220" width="110" height="360"/>
+      <rect x="716" y="330" width="100" height="250"/></g>
+    <g fill="#ffd479" opacity=".9">
+      <rect x="78" y="300" width="10" height="10"/><rect x="102" y="330" width="10" height="10"/><rect x="126" y="300" width="10" height="10"/>
+      <rect x="188" y="230" width="10" height="10"/><rect x="212" y="270" width="10" height="10"/><rect x="212" y="320" width="10" height="10"/>
+      <rect x="286" y="356" width="10" height="10"/><rect x="316" y="386" width="10" height="10"/><rect x="340" y="356" width="10" height="10"/>
+      <rect x="408" y="180" width="10" height="10"/><rect x="440" y="230" width="10" height="10"/><rect x="440" y="300" width="10" height="10"/>
+      <rect x="606" y="250" width="10" height="10"/><rect x="646" y="300" width="10" height="10"/><rect x="672" y="250" width="10" height="10"/>
+      <rect x="740" y="360" width="10" height="10"/><rect x="776" y="400" width="10" height="10"/></g>
+    <rect y="576" width="880" height="10" fill="#0f1830"/>
+  </svg>`,
+  uiDesign:`<svg width="880" height="586" viewBox="0 0 880 586" xmlns="http://www.w3.org/2000/svg">
+    <rect width="880" height="586" fill="#eef2f7"/>
+    <rect x="40" y="40" width="800" height="506" rx="14" fill="#ffffff"/>
+    <rect x="40" y="40" width="800" height="36" rx="14" fill="#1b2a4a"/>
+    <circle cx="62" cy="58" r="5" fill="#f2696a"/><circle cx="80" cy="58" r="5" fill="#e0a04a"/><circle cx="98" cy="58" r="5" fill="#34d07f"/>
+    <rect x="64" y="104" width="180" height="24" rx="6" fill="#dbe3ef"/>
+    <rect x="64" y="140" width="140" height="18" rx="6" fill="#e7ecf4"/>
+    <rect x="64" y="166" width="160" height="18" rx="6" fill="#e7ecf4"/>
+    <rect x="272" y="104" width="320" height="200" rx="8" fill="#dfe7f3"/>
+    <circle cx="360" cy="176" r="34" fill="#3d6bf5" opacity=".8"/>
+    <rect x="420" y="150" width="150" height="14" rx="6" fill="#c6d2e4"/><rect x="420" y="176" width="120" height="14" rx="6" fill="#d5deec"/>
+    <rect x="420" y="212" width="150" height="46" rx="8" fill="#6d8dff"/>
+    <rect x="272" y="324" width="320" height="60" rx="8" fill="#dfe7f3"/>
+    <rect x="624" y="104" width="180" height="280" rx="8" fill="#e7ecf4"/>
+    <rect x="64" y="440" width="740" height="70" rx="8" fill="#e7ecf4"/>
+  </svg>`,
+  /* 无背景矩形 → 有意留出透明区域，用于演示棋盘格透明通道 */
+  pngAlpha:`<svg width="600" height="600" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="gA" cx="38%" cy="32%" r="72%"><stop offset="0" stop-color="#5ce49a"/><stop offset="100%" stop-color="#0f7a45"/></radialGradient>
+      <linearGradient id="gB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".96"/><stop offset="100%" stop-color="#dff6ea" stop-opacity=".72"/></linearGradient>
+    </defs>
+    <circle cx="300" cy="300" r="196" fill="url(#gA)"/>
+    <path d="M176 300 q124 -152 248 0 q-124 152 -248 0 Z" fill="url(#gB)"/>
+    <circle cx="300" cy="300" r="44" fill="#0b3a22" opacity=".9"/>
+    <circle cx="452" cy="176" r="26" fill="#ffffff" opacity=".55"/>
+  </svg>`
+};
+
+const FILES = [
+  { id:'jpg', name:'DSC_0931.JPG', scene:'city', w:5472, h:3648, px:'880×586', size:'8.6 MB',
+    type:'JPEG Image', badge:'jpg', badgeText:'JPG', engine:'基础解码 · libjpeg-turbo', ss:'—', cb:'sRGB', bit:'8bit',
+    rgb:'RGB', cam:'Sony A7 IV', lens:'FE 35mm F1.8', ap:'f/4.0', sh:'1/320 s', iso:'400', fl:'35 mm', date:'2026-04-22 20:14',
+    dec:'22 ms', gpu:'38 MB', tags:['街拍','JPG'] },
+  { id:'png', name:'透明logo_导出.PNG', scene:'pngAlpha', w:2400, h:2400, px:'600×600', size:'164 KB',
+    type:'PNG Image (32bit)', badge:'png', badgeText:'PNG', engine:'基础解码 · libpng', ss:'—', cb:'sRGB', bit:'8bit',
+    rgb:'RGBA', cam:'—', lens:'含 alpha 透明通道（棋盘格显示）', ap:'—', sh:'—', iso:'—', fl:'—', date:'2026-09-11 16:08',
+    dec:'4 ms', gpu:'12 MB', tags:['透明','导出'] },
+  { id:'cr3', name:'IMG_2841.CR3', scene:'landscape', w:6000, h:4000, px:'880×586', size:'31.8 MB', ratio:4/2.66,
+    type:'Canon RAW (CR3)', badge:'raw', badgeText:'RAW', engine:'RAW 引擎 · LibRaw 0.21', ss:'—', cb:'AdobeRGB', bit:'14bit',
+    rgb:'RGB', cam:'Canon EOS R6', lens:'RF 24-70mm F2.8 L', ap:'f/8.0', sh:'1/250 s', iso:'200', fl:'35 mm', date:'2026-08-14 18:42',
+    dec:'43 ms', gpu:'96 MB', tags:['川西','风景','RAW'] },
+  { id:'cdr', name:'海报_B2B年度版_v7.CDR', scene:'cdrPoster', w:4961, h:3508, px:'880×586', size:'4.2 MB',
+    type:'CorelDRAW Document', badge:'cdr', badgeText:'CDR', engine:'矢量引擎 · CDR2019', ss:'4×', cb:'CMYK', bit:'矢量',
+    rgb:'CMYK', cam:'矢量稿 · 12 图层 / 386 对象', lens:'页面 A3 · 300 DPI', ap:'—', sh:'—', iso:'—', fl:'—', date:'2026-09-02 10:14',
+    dec:'18 ms', gpu:'42 MB', tags:['海报','矢量','客户稿'] },
+  { id:'svg', name:'rat-brand-logo.SVG', scene:'logoV', w:1024, h:1024, px:'586×586', size:'12 KB',
+    type:'Scalable Vector Graphics', badge:'svg', badgeText:'SVG', engine:'矢量引擎 · SVG 2', ss:'8×', cb:'sRGB', bit:'矢量',
+    rgb:'RGBA', cam:'—', lens:'—', ap:'—', sh:'—', iso:'—', fl:'—', date:'2026-07-28 09:03',
+    dec:'3 ms', gpu:'8 MB', tags:['品牌','矢量'] },
+  { id:'psd', name:'首页设计稿_v3.PSD', scene:'uiDesign', w:2560, h:1707, px:'880×586', size:'186 MB',
+    type:'Adobe Photoshop', badge:'psd', badgeText:'PSD', engine:'PSD 解析 · 合并预览', ss:'2×', cb:'sRGB', bit:'16bit',
+    rgb:'RGBA', cam:'—', lens:'28 图层 / 6 智能对象', ap:'—', sh:'—', iso:'—', fl:'—', date:'2026-09-10 21:37',
+    dec:'61 ms', gpu:'148 MB', tags:['设计稿','图层'] },
+  { id:'heic', name:'夕阳_街拍.HEIC', scene:'city', w:4032, h:3024, px:'880×586', size:'2.1 MB',
+    type:'High Efficiency Image', badge:'heic', badgeText:'HEIC', engine:'HEIF 解码 · libheif', ss:'—', cb:'Display P3', bit:'10bit',
+    rgb:'RGB', cam:'iPhone 16 Pro', lens:'24mm f/1.78', ap:'f/1.78', sh:'1/120 s', iso:'64', fl:'24 mm', date:'2026-09-08 19:26',
+    dec:'26 ms', gpu:'48 MB', tags:['夜景','街拍'] },
+  { id:'cr2', name:'人像_棚拍_012.CR2', scene:'portrait', w:5760, h:3840, px:'600×800', size:'28.4 MB',
+    type:'Canon RAW (CR2)', badge:'raw', badgeText:'RAW', engine:'RAW 引擎 · LibRaw', ss:'—', cb:'ProPhoto', bit:'14bit',
+    rgb:'RGB', cam:'Canon EOS 5D IV', lens:'EF 85mm f/1.4L', ap:'f/2.0', sh:'1/160 s', iso:'100', fl:'85 mm', date:'2026-05-19 15:02',
+    dec:'39 ms', gpu:'88 MB', tags:['人像','棚拍'] },
+  { id:'gif', name:'加载动效.GIF', scene:'logoV', w:800, h:800, px:'586×586', size:'842 KB',
+    type:'Animated GIF', badge:'gif', badgeText:'GIF', engine:'动画解码 · 120 帧', ss:'—', cb:'sRGB', bit:'8bit',
+    rgb:'RGBA', cam:'—', lens:'循环播放 · 30 fps', ap:'—', sh:'—', iso:'—', fl:'—', date:'2026-06-11 11:20',
+    dec:'7 ms', gpu:'16 MB', tags:['动效'] }
+];
+
+const TABS = ['cr3','jpg','png','cdr'];
+let cur = FILES[0], zoom = 0.64;
+
+/* =========================================================
+   渲染
+   ========================================================= */
+const $ = (s)=>document.querySelector(s);
+const $$ = (s)=>Array.from(document.querySelectorAll(s));
+const app = $('#app');
+
+function thumbSVG(f, w, h){
+  /* 缩略图剥掉场景里的 <text>：否则图片自带的文字会和文件名/角标叠成一团 */
+  const inner = SCENES[f.scene]
+    .replace(/^[\s\S]*?>/,'')
+    .replace(/<\/svg>$/,'')
+    .replace(/<text[\s\S]*?<\/text>/g,'');
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><g>${inner}</g></svg>`;
+}
+
+/* --- 页签 --- */
+function renderTabs(){
+  $('#tabs').innerHTML = TABS.map(id=>{
+    const f = FILES.find(x=>x.id===id);
+    const c = f.badge==='cdr' ? 'var(--cdr)' : f.badge==='raw' ? 'var(--raw)' : 'var(--accent)';
+    return `<div class="tab ${f.id===cur.id?'active':''}" data-id="${f.id}">
+      <span class="dot" style="background:${c}"></span>
+      <span class="nm">${f.name}</span><span class="x">✕</span></div>`;
+  }).join('');
+  $$('#tabs .tab').forEach(t=>t.addEventListener('click',()=>{ selectFile(t.dataset.id); }));
+}
+
+/* --- 胶片条 --- */
+function renderFilm(){
+  $('#filmstrip').innerHTML = FILES.map(f=>`
+    <div class="thumb ${f.id===cur.id?'selected':''}" data-id="${f.id}">
+      ${thumbSVG(f,92,76)}
+      <span class="nm">${f.name.split('.')[0].slice(0,12)}</span>
+      <span class="tag ${f.badge}">${f.badgeText}</span>
+    </div>`).join('');
+  $$('#filmstrip .thumb').forEach(t=>t.addEventListener('click',()=>selectFile(t.dataset.id)));
+}
+
+/* --- 网格（管理模式） --- */
+function renderGrid(){
+  $('#grid').innerHTML = FILES.concat(FILES.slice(0,5)).map((f,i)=>`
+    <div class="cell ${i===1?'selected':''}">
+      <div class="pv">${thumbSVG(f,158,110)}
+        <span class="badge ${f.badge}">${f.badgeText}</span>
+      </div>
+      <div class="mt">
+        <div class="ttl">${f.name}</div>
+        <div class="sub"><span>${f.size}</span><span>${f.w}×${f.h}</span></div>
+      </div>
+    </div>`).join('');
+}
+
+/* --- 批量表 --- */
+function renderBatch(){
+  const rows = [
+    ['海报_B2B年度版_v7.CDR','CDR → PNG','4961×3508 → 9922×7016',78,'进行中','1.2 s'],
+    ['夕阳_街拍.HEIC','HEIC → JPG','4032×3024',100,'完成','0.4 s'],
+    ['IMG_2841.CR3','RAW → JPG','6000×4000',100,'完成','0.9 s'],
+    ['首页设计稿_v3.PSD','PSD → WebP','2560×1707',46,'进行中','3.1 s'],
+    ['字体样张.EPS','EPS → PNG 2×','矢量 → 4961×3508',100,'完成','0.6 s'],
+    ['旧图.BMP','BMP → AVIF','1920×1080',12,'失败','—'],
+    ['rat-brand-logo.SVG','SVG → PNG 4×','1024 → 4096',100,'完成','0.1 s']
+  ];
+  $('#batchRows').innerHTML = rows.map(r=>`
+    <tr><td class="n">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td>
+      <td><span class="pbar"><i class="${r[3]===12?'err':(r[3]===100?'done':'')}" style="width:${r[3]}%"></i></span></td>
+      <td style="color:${r[4]==='完成'?'var(--ok)':r[4]==='失败'?'var(--danger)':'var(--text-2)'}">${r[4]}</td>
+      <td>${r[5]}</td></tr>`).join('');
+}
+
+/* --- 选中文件 --- */
+function selectFile(id){
+  cur = FILES.find(f=>f.id===id) || cur;
+  applyZoom(zoom);
+  renderTabs(); renderFilm();
+  $('#stage-img').innerHTML = SCENES[cur.scene];
+  $('#tbTitle').textContent = cur.name;
+  $('#iName').textContent = cur.name;
+  $('#iType').textContent = cur.type;
+  $('#iSize').textContent = cur.size;
+  $('#iDim').textContent = `${cur.w} × ${cur.h}`;
+  $('#eCam').textContent = cur.cam; $('#eLens').textContent = cur.lens;
+  $('#eAp').textContent = cur.ap; $('#eSh').textContent = cur.sh;
+  $('#eIso').textContent = cur.iso; $('#eFl').textContent = cur.fl;
+  $('#eDate').textContent = cur.date;
+  $('#sbName').textContent = cur.name;
+  $('#sbDim').textContent = `${cur.w}×${cur.h}`;
+  $('#sbSize').textContent = cur.size;
+  $('#cbVal').textContent = cur.cb; $('#bitVal').textContent = cur.bit;
+  $('#ssVal').textContent = cur.ss; $('#decVal').textContent = cur.dec;
+  $('#gpuVal').textContent = cur.gpu;
+  const pill = $('#enginePill');
+  pill.textContent = '◆ ' + cur.engine;
+  pill.className = 'pill ' + (cur.badge==='cdr'?'cdr':cur.badge==='raw'?'raw':'');
+  $('#alphaPill').innerHTML = `通道 <b>${cur.rgb}</b>`;
+  const chipBox = $$('.tag-chips')[0];
+  if(chipBox) chipBox.innerHTML = cur.tags.map(t=>`<span class="chip">${t}</span>`).join('') + '<span class="chip add">＋ 添加</span>';
+}
+
+/* --- 缩放 --- */
+function applyZoom(z){
+  zoom = Math.min(16, Math.max(0.05, z));
+  $('#stage-img').style.setProperty('--z', zoom);
+  const pct = Math.round(zoom*100) + '%';
+  $('#zoomVal').textContent = pct;
+  $('#sbZoom').textContent = pct;
+  $('#viewport').classList.toggle('hidden-mouse', zoom>0.9);
+}
+
+/* =========================================================
+   交互
+   ========================================================= */
+/* 主题 */
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  $$('#themeSeg button').forEach(b=>b.classList.toggle('on', b.dataset.t===t));
+  $$('#themeSeg2 button').forEach(b=>b.classList.toggle('on', b.dataset.t===t));
+  try{ localStorage.setItem('rat-theme', t); }catch(e){}
+}
+$$('#themeSeg button, #themeSeg2 button').forEach(b=>{
+  b.addEventListener('click',()=>setTheme(b.dataset.t));
+});
+$$('#themeSeg2 button').forEach(b=>{
+  if(b.dataset.t==='auto') b.addEventListener('click',()=>{
+    const sys = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light';
+    document.documentElement.setAttribute('data-theme', sys);
+  });
+});
+
+/* 导航 / 屏幕切换 */
+function setScreen(s){
+  app.dataset.screen = s;
+  $$('.rail-btn').forEach(b=>b.classList.toggle('on', b.dataset.screen===s));
+  $$('.screen').forEach(el=>el.classList.toggle('on', el.id === 'screen-'+s));
+  $('#filmstrip').style.display = (s==='view') ? 'flex' : 'none';
+}
+$$('.rail-btn').forEach(b=>{ if(b.dataset.screen) b.addEventListener('click',()=>setScreen(b.dataset.screen)); });
+$('#toBatch').addEventListener('click',()=>setScreen('batch'));
+
+/* 工具栏 */
+const bind = (sel, fn)=>{ const el = $(sel); if(el) el.addEventListener('click', fn); };
+function fitView(){
+  const m = SCENES[cur.scene].match(/width="(\d+)" height="(\d+)"/);
+  const iw = +m[1], ih = +m[2];
+  const vp = $('#viewport');
+  applyZoom(Math.min((vp.clientWidth - 56) / iw, (vp.clientHeight - 56) / ih));
+}
+function fitWidth(){
+  const iw = +(SCENES[cur.scene].match(/width="(\d+)"/)||[0,880])[1];
+  applyZoom(($('#viewport').clientWidth - 56) / iw);
+}
+$('#zoomIn').onclick = ()=>applyZoom(zoom*1.25);
+$('#zoomOut').onclick = ()=>applyZoom(zoom/1.25);
+bind('#fitBtn', ()=>{ fitView(); pushUndo('适应窗口'); });
+bind('#oneBtn', ()=>{ applyZoom(1); pushUndo('1:1 原始像素'); });
+/* 适应宽度 / 水平垂直翻转：入口统一在「⋮ 更多」与右键菜单里，见 runMenuAct() */
+let vFlip = 1, vFlipY = 1;
+const step = (d)=>{ const i = FILES.indexOf(cur); selectFile(FILES[(i+d+FILES.length)%FILES.length].id); };
+$('#prevBtn').onclick = $('#arrowPrev').onclick = ()=>step(-1);
+$('#nextBtn').onclick = $('#arrowNext').onclick = ()=>step(1);
+let rot = 0;
+const rotate = (d)=>{
+  rot = (rot + d + 360) % 360;
+  $('#stage-img').style.setProperty('--rot', rot + 'deg');
+};
+$('#rotL').onclick = ()=>rotate(-90);
+$('#rotR').onclick = ()=>rotate(90);
+
+/* 鼠标滚轮缩放 */
+$('#viewport').addEventListener('wheel', e=>{
+  e.preventDefault();
+  applyZoom(zoom * (e.deltaY < 0 ? 1.12 : 1/1.12));
+}, {passive:false});
+
+/* 拾色演示 */
+$('#viewport').addEventListener('mousemove', e=>{
+  if(e.altKey){
+    const hex = ['#8FB2C9','#E8D9A8','#C9762F','#2B3A55','#4D6B8A','#F4EFE6'][Math.floor(Math.random()*6)];
+    $('#pickDot').style.background = hex;
+    $('#pickTxt').textContent = hex + ' · HSB(' + Math.floor(Math.random()*360) + ',41,79)';
+  }
+});
+
+/* 对比：分割滑块 */
+const splitRange = $('#splitRange');
+function setSplit(v){
+  $('#cmpBody').style.setProperty('--split', v+'%');
+  $('#cmpA').style.setProperty('--split', v+'%');
+  $('.cmp-handle').style.setProperty('--split', v+'%');
+  $('#splitVal').textContent = v+'%';
+}
+splitRange.addEventListener('input', e=>setSplit(e.target.value));
+setSplit(50);
+
+/* 对比：放大镜跟随 */
+$('#cmpBody').addEventListener('mousemove', e=>{
+  const lens = $('#lens'), r = $('#cmpBody').getBoundingClientRect();
+  const x = e.clientX - r.left, y = e.clientY - r.top;
+  lens.style.display = 'block';
+  lens.style.left = (x-60)+'px'; lens.style.top = (y-60)+'px';
+  lens.innerHTML = thumbSVG(FILES[1],120,120);
+});
+$('#cmpBody').addEventListener('mouseleave', ()=>{ $('#lens').style.display='none'; });
+
+/* 开关 */
+$$('.switch').forEach(sw=>sw.addEventListener('click',()=>sw.classList.toggle('on')));
+/* 设置项 */
+$$('.set-nav-item').forEach(it=>it.addEventListener('click',()=>{
+  $$('.set-nav-item').forEach(x=>x.classList.remove('on')); it.classList.add('on');
+}));
+/* 标注 */
+$('#noteToggle').addEventListener('click', e=>{
+  const on = $('#notes').classList.toggle('show');
+  e.currentTarget.classList.toggle('on', on);
+});
+/* 快捷键演示 */
+document.addEventListener('keydown', e=>{
+  if(e.target.tagName==='INPUT') return;
+  if(e.key==='ArrowRight') step(1);
+  if(e.key==='ArrowLeft') step(-1);
+  if(e.key==='+'||e.key==='=') applyZoom(zoom*1.25);
+  if(e.key==='-') applyZoom(zoom/1.25);
+});
+
+/* 对比画布内容 */
+$('#cmpA').innerHTML = SCENES.cdrPoster;
+$('#cmpB').innerHTML = `<div style="transform:scale(1)">${SCENES.cdrPoster.replace('#e8503a','#3d6bf5').replace('#1b2a4a','#0f2d3d')}</div>`;
+
+/* =========================================================
+   轻量调整 · 裁剪 · 撤销（看图为主，不做专业编辑）
+   ========================================================= */
+const ADJ = [
+  {k:'bri', n:'亮度',   min:-100, max:100, step:1, v:0, f:v=>(v>0?'+':'')+v},
+  {k:'con', n:'对比度', min:-100, max:100, step:1, v:0, f:v=>(v>0?'+':'')+v},
+  {k:'sat', n:'饱和度', min:-100, max:100, step:1, v:0, f:v=>(v>0?'+':'')+v}
+];
+const adjV = k => { const a = ADJ.find(x=>x.k===k); return a ? a.v : 0; };
+
+/* --- 调整面板 --- */
+function renderAdj(){
+  $('#adjList').innerHTML = ADJ.map(a=>`<div class="slider-row" data-k="${a.k}">
+      <div class="top"><span>${a.n}</span><span class="val">${a.f(a.v)}</span></div>
+      <input type="range" min="${a.min}" max="${a.max}" step="${a.step}" value="${a.v}">
+    </div>`).join('');
+  $$('#adjList input[type=range]').forEach(inp=>{
+    const row = inp.closest('.slider-row'), a = ADJ.find(x=>x.k===row.dataset.k);
+    inp.addEventListener('input', ()=>{
+      a.v = parseFloat(inp.value);
+      row.querySelector('.val').textContent = a.f(a.v);
+      row.classList.toggle('mod', a.v !== 0);
+      applyAdjFilter();
+    });
+    inp.addEventListener('change', ()=>{ if(a.v !== 0) pushUndo('调整：' + a.n + ' ' + a.f(a.v)); });
+  });
+}
+function syncAdjUI(){
+  $$('#adjList .slider-row').forEach(row=>{
+    const a = ADJ.find(x=>x.k===row.dataset.k);
+    row.querySelector('input').value = a.v;
+    row.querySelector('.val').textContent = a.f(a.v);
+    row.classList.toggle('mod', a.v !== 0);
+  });
+  applyAdjFilter();
+}
+function applyAdjFilter(){
+  const bri = 1 + adjV('bri')/100*0.6;
+  const con = 1 + adjV('con')/100*0.55;
+  const sat = 1 + adjV('sat')/100*0.8;
+  $('#stage-img').style.filter =
+    `brightness(${bri.toFixed(3)}) contrast(${con.toFixed(3)}) saturate(${sat.toFixed(3)})`;
+}
+function resetAdj(record){
+  ADJ.forEach(a=>a.v = 0);
+  syncAdjUI();
+  if(record) pushUndo('重置调整');
+}
+function autoEnhance(){
+  const set = {bri:6, con:16, sat:12};
+  ADJ.forEach(a=>a.v = set[a.k] ?? 0);
+  syncAdjUI();
+  pushUndo('一键美化');
+}
+
+/* --- 裁剪（浮层，非破坏性） --- */
+let cropOn = false, lensOn = false;
+function showCrop(on){
+  cropOn = on;
+  $('#cropBox').classList.toggle('show', on);
+  $('#ratioRow').classList.toggle('off', !on);
+  $('#cropBtn').classList.toggle('on', on);
+  if(on) $('#viewport').classList.add('hidden-mouse');
+  else $('#viewport').classList.remove('hidden-mouse');
+}
+const CROP = {
+  free:[14,20,'自由裁剪 · 拖动边角调整'],
+  '1:1':[20,26.6,'1:1 · 4000×4000 px'],
+  '4:3':[15,24,'4:3 · 4000×3000 px'],
+  '16:9':[14,22,'16:9 · 4000×2250 px'],
+  orig:[14,20,'原图比例 · 6000×4000 px']
+};
+let cropRatio = 'free';
+$$('#ratioRow button[data-r]').forEach(b=>b.addEventListener('click',()=>{
+  $$('#ratioRow button[data-r]').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  cropRatio = b.dataset.r;
+  const c = CROP[cropRatio];
+  $('#cropBox').style.inset = `${c[0]}% ${c[1]}%`;
+  $('#cropSize').textContent = c[2];
+}));
+/* 裁剪框拖动示意（真实实现为四角手柄缩放） */
+(()=>{
+  let drag = false, ox = 0, oy = 0;
+  $('#viewport').addEventListener('mousedown', e=>{ if(!cropOn) return; drag = true; ox = e.clientX; oy = e.clientY; });
+  document.addEventListener('mousemove', e=>{
+    if(!drag || !cropOn) return;
+    const dx = e.clientX - ox, dy = e.clientY - oy;
+    $('#cropBox').style.inset = `calc(14% + ${dy}px) calc(20% - ${dx}px) calc(14% - ${dy}px) calc(20% + ${dx}px)`;
+  });
+  document.addEventListener('mouseup', ()=>{ drag = false; });
+})();
+
+/* --- 撤销栈：只记参数，原文件不动 --- */
+let hist = ['打开原图'], hIdx = 0;
+function pushUndo(label){
+  hist = hist.slice(0, hIdx + 1);
+  hist.push(label);
+  hIdx = hist.length - 1;
+  renderUndo();
+}
+function undo(){ if(hIdx > 0){ hIdx--; renderUndo(); if(hIdx === 0) resetAdj(false); } }
+function redo(){ if(hIdx < hist.length - 1){ hIdx++; renderUndo(); } }
+function renderUndo(){
+  $('#sbOp').textContent = hIdx === 0 ? '无' : hist[hIdx] + `（第 ${hIdx} 步）`;
+  $('#undoBtn').disabled = hIdx <= 0;
+  $('#redoBtn').disabled = hIdx >= hist.length - 1;
+}
+
+/* --- 右键菜单 / 更多操作 --- */
+const MENU = [
+  {t:'打开方式…', ic:'🗂'},
+  {t:'在资源管理器中显示', ic:'📁', k:'Ctrl+Enter'},
+  {t:'重命名', ic:'✎', k:'F2'},
+  {sep:1},
+  {t:'顺时针旋转 90°', ic:'↻', k:'Ctrl+R', act:'rot'},
+  {t:'逆时针旋转 90°', ic:'↺', k:'Ctrl+Shift+R', act:'rotL'},
+  {t:'水平翻转', ic:'⇋', act:'flip'},
+  {t:'垂直翻转', ic:'⇅', act:'flipv'},
+  {t:'裁剪…', ic:'✂', k:'C', act:'crop'},
+  {t:'一键美化', ic:'✨', act:'auto'},
+  {sep:1},
+  {t:'复制图片到剪贴板', ic:'⧉', k:'Ctrl+C', act:'clip'},
+  {t:'复制文件路径', ic:'🔗', k:'Ctrl+Shift+C'},
+  {t:'另存为 / 转换格式…', ic:'⤓', k:'Ctrl+S', act:'batch'},
+  {t:'压缩到 2 MB', ic:'📉'},
+  {t:'设为壁纸', ic:'🖼'},
+  {t:'打印…', ic:'🖨', k:'Ctrl+P'},
+  {sep:1},
+  {t:'适应窗口', ic:'⤢', k:'Ctrl+0', act:'fit'},
+  {t:'适应宽度', ic:'⇔', act:'fitw'},
+  {t:'1:1 原始像素', ic:'⊞', k:'Ctrl+1', act:'one'},
+  {t:'幻灯片播放', ic:'▶', k:'F5'},
+  {t:'全屏查看', ic:'⛶', k:'F11'},
+  {sep:1},
+  {t:'删除（进回收站）', ic:'🗑', k:'Del', danger:1}
+];
+function buildMenu(){
+  const m = $('#ctxMenu');
+  m.innerHTML = MENU.map(it=> it.sep ? '<div class="ctx-sep"></div>'
+    : `<div class="ctx-item" data-act="${it.act||''}" ${it.danger?'style="color:var(--danger)"':''}>
+         <span class="ic">${it.ic}</span><span>${it.t}</span><span class="k">${it.k||''}</span></div>`).join('');
+  m.querySelectorAll('.ctx-item').forEach(el=>el.addEventListener('click',()=>{
+    hideMenu();
+    runMenuAct(el.dataset.act);
+  }));
+}
+function runMenuAct(a){
+  if(!a) return;
+  if(a === 'crop'){ setScreen('view'); showCrop(true); }
+  else if(a === 'rot'){ rotate(90); pushUndo('顺时针旋转 90°'); }
+  else if(a === 'rotL'){ rotate(-90); pushUndo('逆时针旋转 90°'); }
+  else if(a === 'flip'){ vFlip *= -1; $('#stage-img').style.setProperty('--flip', vFlip); pushUndo('水平翻转'); }
+  else if(a === 'flipv'){ vFlipY *= -1; $('#stage-img').style.setProperty('--flipy', vFlipY); pushUndo('垂直翻转'); }
+  else if(a === 'auto'){ autoEnhance(); }
+  else if(a === 'fit'){ fitView(); pushUndo('适应窗口'); }
+  else if(a === 'fitw'){ fitWidth(); pushUndo('适应宽度'); }
+  else if(a === 'one'){ applyZoom(1); pushUndo('1:1 原始像素'); }
+  else if(a === 'clip'){ pushUndo('复制图片到剪贴板'); }
+  else if(a === 'batch'){ setScreen('batch'); }
+}
+function showMenu(x, y){
+  const m = $('#ctxMenu'), r = app.getBoundingClientRect();
+  m.classList.add('show');
+  m.style.left = Math.min(x - r.left, r.width - m.offsetWidth - 8) + 'px';
+  m.style.top  = Math.min(y - r.top,  r.height - m.offsetHeight - 8) + 'px';
+}
+function hideMenu(){ $('#ctxMenu').classList.remove('show'); }
+
+/* ---- 看图屏操作绑定 ---- */
+bind('#cropBtn', ()=>showCrop(true));
+bind('#cropCancel', ()=>showCrop(false));
+bind('#cropApply', ()=>{
+  const label = $('#cropSize').textContent.split('·')[0].trim();
+  showCrop(false);
+  pushUndo('裁剪 ' + label);
+});
+bind('#adjustBtn', ()=>{
+  const el = $('#adjSection');
+  el.scrollIntoView({ block:'start', behavior:'smooth' });
+  el.style.transition = 'box-shadow .2s';
+  el.style.boxShadow = '0 0 0 2px var(--accent)';
+  setTimeout(()=>{ el.style.boxShadow = 'none'; }, 900);
+});
+bind('#lensBtn', ()=>{
+  lensOn = !lensOn;
+  $('#lensBtn').classList.toggle('on', lensOn);
+  $('#viewLens').style.display = lensOn ? 'block' : 'none';
+  if(lensOn) $('#viewLens').innerHTML = `<div style="transform:scale(2);transform-origin:0 0">${SCENES[cur.scene]}</div>`;
+  pushUndo(lensOn ? '打开放大镜 2×' : '关闭放大镜');
+});
+/* 放大镜跟随鼠标：以光标为中心取景 */
+$('#viewport').addEventListener('mousemove', e=>{
+  if(!lensOn) return;
+  const box = $('#viewport').getBoundingClientRect();
+  const x = e.clientX - box.left, y = e.clientY - box.top;
+  const m = SCENES[cur.scene].match(/width="(\d+)" height="(\d+)"/);
+  const iw = +m[1], ih = +m[2], R = 60;
+  const lens = $('#viewLens');
+  lens.style.left = (x - R) + 'px';
+  lens.style.top  = (y - R) + 'px';
+  const inner = lens.firstElementChild;
+  if(inner) inner.style.transform =
+    `translate(${-(x/box.width*iw*2 - R)}px, ${-(y/box.height*ih*2 - R)}px) scale(2)`;
+});
+bind('#autoBtn', autoEnhance);
+bind('#resetBtn', ()=>resetAdj(true));
+bind('#copyClip', ()=>pushUndo('复制图片到剪贴板'));
+bind('#undoBtn', undo);
+bind('#redoBtn', redo);
+bind('#moreBtn', (e)=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  buildMenu(); showMenu(r.left - 150, r.bottom + 4);
+});
+$('#viewport').addEventListener('contextmenu', e=>{ e.preventDefault(); showMenu(e.clientX, e.clientY); });
+document.addEventListener('click', hideMenu);
+document.addEventListener('keydown', e=>{
+  if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return;
+  if(e.ctrlKey && e.key.toLowerCase() === 'z'){ e.preventDefault(); undo(); return; }
+  if(e.ctrlKey && e.key.toLowerCase() === 'y'){ e.preventDefault(); redo(); return; }
+  if(e.key === 'Escape' && cropOn) showCrop(false);
+  else if(e.key.toLowerCase() === 'c' && !e.ctrlKey) showCrop(true);
+  else if(e.key.toLowerCase() === 'l' && !e.ctrlKey) $('#lensBtn').click();
+});
+
+/* 初始化 */
+renderTabs(); renderFilm(); renderGrid(); renderBatch();
+renderAdj(); renderUndo(); buildMenu(); renderFormats();
+selectFile('cr3');
+setScreen('view');
+fitView();
+try{ const t = localStorage.getItem('rat-theme'); if(t) setTheme(t); }catch(e){}
+
+/* 直达参数：ui-mockup.html?screen=manage&theme=dark —— 便于逐屏评审 / 截图比对 */
+try{
+  const q = new URLSearchParams(location.search);
+  const sc = q.get('screen');
+  if(sc && ['view','manage','compare','batch','settings'].includes(sc)) setScreen(sc);
+  const th = q.get('theme');
+  if(th === 'light' || th === 'dark') setTheme(th);
+  if(q.get('notes') === '1'){ $('#notes').classList.add('show'); $('#noteToggle').classList.add('on'); }
+}catch(e){}
+</script>
+</body>
+</html>

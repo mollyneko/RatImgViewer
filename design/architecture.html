@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rat看图王 · 技术架构与实施方案</title>
+<style>
+:root{
+  --bg:#f5f7fa; --panel:#ffffff; --sub:#fafbfd; --sunken:#eef1f6;
+  --text:#1a1e26; --text-2:#5a6472; --text-3:#8a93a3;
+  --border:#e3e7ee; --border-2:#d2d9e5;
+  --accent:#3d6bf5; --accent-2:#6d8dff; --accent-soft:#e7edff;
+  --cdr:#8b5cf6; --raw:#e0518a; --ok:#12a150; --warn:#d98026; --danger:#e04b4b;
+  --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.07);
+  --page:linear-gradient(180deg,#eef1f6,#e6eaf1);
+}
+[data-theme="dark"]{
+  --bg:#14161b; --panel:#1c1f26; --sub:#191c22; --sunken:#12141a;
+  --text:#e6e9ef; --text-2:#a3abba; --text-3:#6e7787;
+  --border:#2a2f39; --border-2:#373d49;
+  --accent:#6b8dff; --accent-2:#8ba3ff; --accent-soft:#22305c;
+  --cdr:#a78bfa; --raw:#f472b6; --ok:#34d07f; --warn:#e0a04a; --danger:#f2696a;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 26px rgba(0,0,0,.45);
+  --page:linear-gradient(180deg,#0f1116,#161922);
+}
+*{box-sizing:border-box}
+body{margin:0;font:13.5px/1.65 "Segoe UI Variable Text","Segoe UI",system-ui,"Microsoft YaHei UI","PingFang SC",sans-serif;
+  background:var(--page);color:var(--text);-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 22px 60px}
+header{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+.logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--cdr));display:grid;place-items:center;color:#fff;box-shadow:var(--shadow)}
+h1{font-size:20px;margin:0;letter-spacing:.3px}
+.sub{color:var(--text-3);font-size:12.5px}
+.seg{display:flex;background:rgba(255,255,255,.6);border:1px solid var(--border);border-radius:999px;padding:3px;gap:2px;margin-left:auto}
+.seg button{border:0;background:transparent;color:var(--text-2);font:inherit;font-size:12px;padding:6px 13px;border-radius:999px;cursor:pointer}
+.seg button.on{background:var(--panel);color:var(--text);font-weight:600;box-shadow:var(--shadow)}
+[data-theme="dark"] .seg button.on{background:#333a48}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin:14px 0;box-shadow:var(--shadow)}
+.card h2{margin:0 0 4px;font-size:15.5px;display:flex;align-items:center;gap:9px}
+.card h2 .num{width:22px;height:22px;border-radius:7px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:12px;font-weight:800}
+.card .desc{margin:0 0 14px;color:var(--text-3);font-size:12.5px}
+.note{background:var(--accent-soft);border:1px solid var(--accent);border-left-width:3px;border-radius:10px;padding:11px 14px;margin:0 0 14px;font-size:12.5px;line-height:1.75;color:var(--text)}
+.note b{color:var(--text)}
+.note code{font-size:11.5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.mini{background:var(--sub);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.mini .t{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:4px}
+.mini .d{font-size:12px;color:var(--text-3);line-height:1.6}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;color:var(--text-3);font-size:11px;letter-spacing:.6px;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--border)}
+td{padding:9px 10px;border-bottom:1px solid var(--border);color:var(--text-2);vertical-align:top}
+td b{color:var(--text)}
+tbody tr:last-child td{border-bottom:0}
+code{font-family:"Cascadia Mono",Consolas,monospace;font-size:11.5px;background:var(--sunken);border:1px solid var(--border);border-radius:5px;padding:1px 5px;color:var(--text)}
+pre{margin:0;font-family:"Cascadia Mono",Consolas,monospace;font-size:11.5px;line-height:1.7;color:var(--text-2);
+  background:var(--sunken);border:1px solid var(--border);border-radius:10px;padding:14px 16px;overflow:auto}
+.tagpill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--border);color:var(--text-3);margin:0 4px 4px 0}
+.tagpill.a{border-color:var(--cdr);color:var(--cdr)}
+.tagpill.b{border-color:var(--raw);color:var(--raw)}
+.tagpill.c{border-color:var(--ok);color:var(--ok)}
+.bar{height:6px;border-radius:4px;background:var(--sunken);overflow:hidden;min-width:120px}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--cdr))}
+.flowbox{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:10px;box-shadow:var(--shadow)}
+footer{margin-top:22px;color:var(--text-3);font-size:12px;line-height:1.8}
+.kvlist{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:12.5px}
+.kvlist .k{color:var(--text-3)}
+@media (max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="logo">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M4 5.5C4 4.67 4.67 4 5.5 4h13c.83 0 1.5.67 1.5 1.5v13c0 .83-.67 1.5-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-13Z" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="9.5" r="1.6" fill="currentColor"/><path d="M5 17l4.2-4.6 3.1 3 3-3.5L19 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </div>
+  <div>
+    <h1>Rat看图王 · 技术架构与实施方案</h1>
+    <div class="sub">Electron 外壳 + 自研本地解码内核 · 含 CorelDRAW CDR 原生解析</div>
+  </div>
+  <div class="seg" id="seg">
+    <button data-t="light" class="on">☀ 白天</button>
+    <button data-t="dark">🌙 黑夜</button>
+  </div>
+</header>
+
+<!-- 0 目标 -->
+<div class="card">
+  <h2><span class="num">0</span>产品定位与性能目标</h2>
+  <p class="desc">
+    <b>定位：轻量看图器，不是编辑器。</b>只做三件事 —— 打开快、翻页快、少见的格式也能看。所有决策围绕下面这几个数展开。
+  </p>
+  <div class="grid2" style="margin-bottom:14px">
+    <div class="mini">
+      <div class="t">✅ 做（Keep）</div>
+      <div class="d">浏览与缩放 · 缩略图网格 · 旋转翻转 · 非破坏性裁剪 · 亮度/对比度/饱和度 · 幻灯片 · 放大镜 ·
+      复制 / 设为壁纸 / 打印 · 格式转换与批量另存 · CDR 等矢量查看 · EXIF 与直方图</div>
+    </div>
+    <div class="mini">
+      <div class="t">🚫 不做（Non-goals）</div>
+      <div class="d">图层编辑与 PSD 分层导出 · AI 抠图 / 去水印 / 超分（要拖几十 MB 模型）· 长图拼接与拼图 ·
+      透视校正 · 曲线 / 色阶 / 降噪等专业调色 · 标注与水印 · 画布尺寸调整。这些交给外部工具，UI 里直接不出现。</div>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>指标</th><th>目标</th><th>对照（同类看图器常见值）</th><th>实现手段</th></tr></thead>
+    <tbody>
+      <tr><td><b>安装包体积</b></td><td>&lt; 25 MB</td><td>60 ~ 200 MB</td><td>主包只带基础位图解码；RAW / HEIC / 矢量解析器拆为可选插件</td></tr>
+      <tr><td><b>冷启动到可看图</b></td><td>&lt; 1.2 s</td><td>3 ~ 6 s</td><td>窗口先渲染、解码内核懒加载；V8 snapshot + <code>v8-compile-cache</code></td></tr>
+      <tr><td><b>常驻内存</b></td><td>&lt; 180 MB</td><td>400 MB+</td><td>LRU 位图缓存 + 显存纹理池上限；不留后台常驻任务</td></tr>
+      <tr><td><b>单图翻页延迟</b></td><td>&lt; 16 ms（预取后）</td><td>200 ms ~ 1 s</td><td>前后 3 张预解码、GPU 纹理池复用</td></tr>
+      <tr><td><b>4K 照片解码上屏</b></td><td>&lt; 60 ms</td><td>300 ms+</td><td>SIMD 解码 + 直接纹理上传，不走 <code>&lt;img&gt;</code></td></tr>
+      <tr><td><b>CDR 矢量首屏</b></td><td>&lt; 150 ms</td><td>不支持 / 秒级</td><td>先出内嵌预览图，后台完成全量光栅化后热替换</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 1 总体架构 -->
+<div class="card">
+  <h2><span class="num">1</span>总体分层架构</h2>
+  <p class="desc">UI 层只做显示，所有像素操作都在原生层完成，Electron 不参与逐像素计算。</p>
+  <div class="flowbox">
+    <svg viewBox="0 0 1120 400" width="100%" height="400" role="img" aria-label="分层架构图">
+      <defs>
+        <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+          <path d="M0,0 L8,4.5 L0,9 z" fill="#8a93a3"/>
+        </marker>
+      </defs>
+      <style>
+        .bx{fill:var(--panel);stroke:var(--border-2);rx:10}
+        .t1{font:600 13px "Segoe UI",sans-serif;fill:var(--text)}
+        .t2{font:11.5px "Segoe UI",sans-serif;fill:var(--text-3)}
+        .ln{stroke:var(--border-2);stroke-width:1;marker-end:url(#ar)}
+      </style>
+
+      <!-- UI 层 -->
+      <rect class="bx" x="60" y="16" width="1000" height="86" rx="12"/>
+      <text class="t1" x="80" y="40">① 表现层 UI（Renderer · React 18 + Fluent 变量）</text>
+      <text class="t2" x="80" y="60">无边框窗口 / 多标签页 / 虚拟滚动网格 / Canvas 视口 / 属性面板 · 主题走 CSS 变量，nativeTheme 驱动</text>
+      <text class="t2" x="80" y="80">只接收 RGBA 位图句柄与元数据，不接触文件字节</text>
+
+      <!-- IPC -->
+      <rect class="bx" x="60" y="118" width="1000" height="52" rx="10" style="fill:var(--accent-soft);stroke:var(--accent)"/>
+      <text class="t1" x="80" y="140" style="fill:var(--accent)">② IPC / 共享内存层</text>
+      <text class="t2" x="80" y="158" style="fill:var(--accent)">contextBridge 命令通道 + SharedArrayBuffer 零拷贝位图传输（一张 4K 图 48 MB，序列化 = 自杀）</text>
+
+      <!-- 内核 -->
+      <rect class="bx" x="60" y="186" width="1000" height="96" rx="12"/>
+      <text class="t1" x="80" y="210">③ 编排内核（Main 进程 · C++ Addon 调度）</text>
+      <text class="t2" x="80" y="230">解码线程池（uv_threadpool × N）· LRU 内存缓存 · 磁盘缩略图库（SQLite）· 预取调度器 · 格式嗅探</text>
+      <text class="t2" x="80" y="250">统一中间表示：RatBitmap{RGBA/CMYK, stride, iccProfile, exifIFD, vectorTree?}</text>
+      <text class="t2" x="80" y="270">矢量对象树保留可编辑节点 → 支持「导出 SVG / PDF」而非只能导出位图</text>
+
+      <!-- 光栅化 -->
+      <rect class="bx" x="60" y="298" width="490" height="76" rx="10"/>
+      <text class="t1" x="80" y="322">④ 光栅化 / 缩放（Skia 单引擎）</text>
+      <text class="t2" x="80" y="342">Lanczos3 / Mitchell 高质量重采样 · GPU(D3D11/Metal) 瓦片合成</text>
+      <text class="t2" x="80" y="360">SIMD(AVX2/NEON) 色彩空间转换 · ICC 色彩管理（lcms2）</text>
+
+      <rect class="bx" x="570" y="298" width="490" height="76" rx="10"/>
+      <text class="t1" x="590" y="322">⑤ 格式解析（主包内置 + 可选插件）</text>
+      <text class="t2" x="590" y="342">内置：libjpeg-turbo / libpng / libwebp / giflib / libtiff / 自研 BMP·ICO·TGA</text>
+      <text class="t2" x="590" y="360">插件：libraw / libheif / libavif / libjxl · 矢量：libcdr + 自研 AI·PDF·WMF 解析器</text>
+
+      <line class="ln" x1="300" y1="102" x2="300" y2="116"/>
+      <line class="ln" x1="700" y1="102" x2="700" y2="116"/>
+      <line class="ln" x1="300" y1="170" x2="300" y2="184"/>
+      <line class="ln" x1="700" y1="170" x2="700" y2="184"/>
+      <line class="ln" x1="280" y1="282" x2="280" y2="296"/>
+      <line class="ln" x1="800" y1="282" x2="800" y2="296"/>
+    </svg>
+  </div>
+</div>
+
+<!-- 2 CDR 解码链路 -->
+<div class="card">
+  <h2><span class="num">2</span>CDR 是怎么被画出来的（核心难点）</h2>
+  <p class="desc">CorelDRAW 私有二进制格式从未公开。业界唯一可行路径是逆向后的 <b>libcdr + librevenge</b> 链路（LibreOffice 同宗），而不是像大多数看图器那样「偷偷调用 CorelDRAW.exe 另存」——后者既慢又依赖盗版。<b>已落地（V1.0.0）</b>：libcdr 编译为独立转换进程 <code>vendor/cdr2svg/cdr2svg.exe</code>（librevenge 生成 SVG，Chromium 原生渲染）。选独立进程而不是 N-API 进程内加载：恶意/损坏 CDR 崩溃时不会连累看图器本体；产物按「路径+mtime+页码」缓存，文件没变不重转。打开时内嵌预览先秒显，矢量后台转换完成后热替换；没有内嵌预览的文件直接走矢量通道（实测 LibreOffice 官方语料 84/84 全通过，单文件毫秒级）。</p>
+  <div class="flowbox">
+    <svg viewBox="0 0 1120 232" width="100%" height="232" role="img" aria-label="CDR 解码链路">
+      <style>
+        .nb{fill:var(--panel);stroke:var(--border-2);stroke-width:1.2}
+        .nv{fill:var(--cdr);stroke:var(--cdr)}
+        .nt{font:600 12px "Segoe UI",sans-serif;fill:var(--text)}
+        .ns{font:11px "Segoe UI",sans-serif;fill:var(--text-3)}
+        .ar{stroke:var(--cdr);stroke-width:1.6;fill:none;marker-end:url(#ar2)}
+        .vt{font:600 11px "Segoe UI",sans-serif;fill:#fff}
+      </style>
+      <defs><marker id="ar2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L8,4.5 L0,9 z" fill="#8b5cf6"/></marker></defs>
+      <g>
+        <rect class="nb" x="8" y="70" width="150" height="86" rx="10"/>
+        <text class="nt" x="24" y="96">.CDR 文件</text>
+        <text class="ns" x="24" y="116">RIFF 容器</text>
+        <text class="ns" x="24" y="134">压缩 + 分块</text>
+      </g>
+      <path class="ar" d="M162 113 L196 113"/>
+      <g>
+        <rect class="nv" x="200" y="70" width="160" height="86" rx="10" opacity=".14"/>
+        <rect class="nb" x="200" y="70" width="160" height="86" rx="10"/>
+        <text class="nt" x="216" y="96">容器解析</text>
+        <text class="ns" x="216" y="116">解 RIFF chunk</text>
+        <text class="ns" x="216" y="134">LZW / RLE 解压</text>
+      </g>
+      <path class="ar" d="M364 113 L398 113"/>
+      <g>
+        <rect class="nb" x="402" y="70" width="170" height="86" rx="10"/>
+        <text class="nt" x="418" y="96">记录 → 对象树</text>
+        <text class="ns" x="418" y="116">libcdr解析 lyric/ffl/</text>
+        <text class="ns" x="418" y="134">outl/fill 记录</text>
+      </g>
+      <path class="ar" d="M576 113 L610 113"/>
+      <g>
+        <rect class="nb" x="614" y="70" width="170" height="86" rx="10"/>
+        <text class="nt" x="630" y="96">librevenge</text>
+        <text class="ns" x="630" y="116">统一绘图指令</text>
+        <text class="ns" x="630" y="134">RVNGDrawingInterface</text>
+      </g>
+      <path class="ar" d="M788 113 L822 113"/>
+      <g>
+        <rect class="nv" x="826" y="70" width="150" height="86" rx="10" opacity=".14"/>
+        <rect class="nb" x="826" y="70" width="150" height="86" rx="10"/>
+        <text class="nt" x="842" y="96">Skia 渲染</text>
+        <text class="ns" x="842" y="116">贝塞尔/渐变/</text>
+        <text class="ns" x="842" y="134">文字轮廓</text>
+      </g>
+      <path class="ar" d="M980 113 L1006 113"/>
+      <g>
+        <rect class="nb" x="1010" y="70" width="104" height="86" rx="10"/>
+        <text class="nt" x="1024" y="96">RGBA 纹理</text>
+        <text class="ns" x="1024" y="116">上屏 / 导出</text>
+      </g>
+
+      <text class="nt" x="8" y="34" style="fill:var(--cdr)">▸ 主链路（推荐，离线可用）</text>
+      <text class="ns" x="8" y="52">4 MB CDR 稿，A3@300DPI 渲染约 120 ~ 180 ms；缩略图结果写入 SQLite，二次打开 &lt; 5 ms</text>
+
+      <line x1="8" y1="180" x2="1112" y2="180" stroke="var(--border)" stroke-dasharray="5 5"/>
+      <text class="nt" x="8" y="204" style="fill:var(--warn)">▸ 兜底链路（主链路失败时自动切换）</text>
+      <text class="ns" x="8" y="222">① 读取文件头内嵌的 riff thumbnail 预览图（几乎全部 CDR 都自带 96~256 px 预览）→ 秒显 → ② 后台异步全量渲染 → ③ 完成后热替换画面</text>
+      <text class="ns" x="700" y="222" style="fill:var(--danger)">不推荐：调用 CorelDRAW COM 自动化 — 需安装正版、秒级延迟、进程易挂死</text>
+    </svg>
+  </div>
+
+  <div class="grid3" style="margin-top:14px">
+    <div class="mini">
+      <div class="t">版本兼容矩阵</div>
+      <div class="d">
+        <span class="tagpill a">CDR 1~2024</span><span class="tagpill a">CDT 模板</span>
+        <span class="tagpill a">CMX</span><span class="tagpill">CDRX v16+</span>
+        <span class="tagpill">加密 CDR（提示无法解析）</span>
+      </div>
+    </div>
+    <div class="mini">
+      <div class="t">渲染难点</div>
+      <div class="d">CMYK→RGB 需用其内嵌 ICC 做相对色度转换，否则品牌红会偏；渐变网格(mesh)与艺术笔触(artistic media)支持不全，需回落为近似描边。</div>
+    </div>
+    <div class="mini">
+      <div class="t">输出能力</div>
+      <div class="d">对象树保留 → 可直接导出 SVG / PDF 矢量，而非只有位图；印刷场景提供「按 mm + DPI」精确输出。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 3 进程模型 -->
+<div class="card">
+  <h2><span class="num">3</span>Electron 进程模型与关键开关</h2>
+  <p class="desc">Electron 的性能名声是被糟糕配置拖累的，下面这几项是必选项。</p>
+  <div class="grid2">
+    <div>
+      <table>
+        <thead><tr><th>配置项</th><th>取值</th><th>原因</th></tr></thead>
+        <tbody>
+          <tr><td><code>nodeIntegration</code></td><td>false</td><td>安全基线，一律走 preload</td></tr>
+          <tr><td><code>contextIsolation</code></td><td>true</td><td>同上</td></tr>
+          <tr><td><code>backgroundThrottling</code></td><td>false</td><td>后台仍能完成批量转码</td></tr>
+          <tr><td><code>--enable-features</code></td><td>Vulkan/AcceleratedVideoDecode</td><td>让 Chromium 走 GPU 合成</td></tr>
+          <tr><td><code>disableHardwareAcceleration</code></td><td>不设置</td><td>关掉就退回软件光栅，翻页必卡</td></tr>
+          <tr><td>渲染方式</td><td>离屏 Canvas + <code>OffscreenCanvas</code></td><td>一次解码多次绘制</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <pre>// 主线程启动序列（关键路径）
+app.whenReady().then(async () => {
+  await core.preload();            // 1. 原生解码内核（~180ms）
+  createWindow();                  // 2. 立刻出窗口
+  await db.openThumbCache();       // 3. 后台挂载缩略图库
+  core.setThreads(os.cpus().length-1);
+});
+
+// 零拷贝：位图通过 SharedArrayBuffer 交给渲染进程
+ipcMain.handle('core:decode', async (e, path, opts) => {
+  const bmp = await pool.decode(path, opts);   // 线程池
+  return core.toShared(bmp);                   // 不序列化
+});</pre>
+    </div>
+  </div>
+</div>
+
+<!-- 4 工程结构 -->
+<div class="card">
+  <h2><span class="num">4</span>工程目录结构</h2>
+  <p class="desc">Electron + Vite + React 渲染层；原生层为独立 CMake 工程，产出 <code>.node</code> Addon。</p>
+  <div class="note">
+    <b>⚠️ M1 实现现状（有意偏离设计）</b><br>
+    渲染层<b>没有用 Vite + React</b>，改为 <b>原生 HTML/CSS/JS</b>（<code>src/renderer/</code> 三个文件）。
+    理由：本产品定位是「轻量 + 启动快」，去掉打包器与运行时后安装包更小、冷启动更快，也更契合
+    「看图软件就该秒开」的心智。原生内核（C++ Addon）因本机<b>没有 C++ 工具链</b>暂缓，
+    本版 CDR/PSD/RAW 先用<b>内嵌预览提取</b>兜底（见第 2 节兜底链路）。<br>
+    实际目录：<code>src/main/</code>（main · preload · scanner · exif · preview · cache · assoc）+
+    <code>src/renderer/</code>（index.html · styles.css · app.js）+ <code>build/</code>（图标 · NSIS 钩子）。
+  </div>
+  <pre>Rat看图王/
+├─ electron/                     主进程（ Electron 28+ ）
+│   ├─ main.ts                   窗口 / 生命周期
+│   ├─ preload.ts                contextBridge 暴露 core API
+│   ├─ ipc/                      decode · batch · fs-watch · dialog
+│   └─ native/rat-core.node      C++ Addon（计划中；CDR 已改走独立进程方案）
+├─ vendor/cdr2svg/                cdr2svg.exe + 运行时 DLL（libcdr 0.1.9，已落地）
+├─ native/                       原生内核（CMake + vcpkg 依赖）
+│   ├─ src/bitmap.cpp            RatBitmap 统一中间表示
+│   ├─ src/decode/               raster/  jpeg png webp heif avif jxl tiff gif raw
+│   ├─ src/vector/               cdr.cpp  ai.cpp  pdf.cpp  wmf.cpp  svg.cpp
+│   ├─ src/render/               skia_surface.cpp  tile_pyramid.cpp  resample.cpp
+│   └─ third/                    libcdr librevenge lcms2 libraw skia(vcpkg)
+├─ src/                          渲染进程 UI
+│   ├─ app/                      shell 布局（titlebar/rail/viewport/inspector）
+│   ├─ views/                    Viewer · Manager · Compare · Batch · Settings
+│   ├─ canvas/                   ViewportController（缩放/平移/瓦片合成）
+│   ├─ theme/                    tokens.css + nativeTheme 联动
+│   └─ store/                    zustand（标签页 / 预取队列 / 选中态）
+└─ scripts/                      build-native.ps1 · package(nsis/portable)</pre>
+</div>
+
+<!-- 5 性能预算 -->
+<div class="card">
+  <h2><span class="num">5</span>渲染预算与内存控制</h2>
+  <div class="grid2">
+    <div>
+      <table>
+        <thead><tr><th>资源</th><th>上限</th><th>策略</th></tr></thead>
+        <tbody>
+          <tr><td><b>内存 LRU</b></td><td>硬上限 180 MB</td><td>超过即释放最久未用全分辨率位图；上限可在设置里调</td></tr>
+          <tr><td><b>显存纹理池</b></td><td>512 MB</td><td>视口 ±1 屏瓦片常驻，其余按 mip 降级</td></tr>
+          <tr><td><b>磁盘缩略图库</b></td><td>2 GB 滚动</td><td>SQLite + WebP 256px，按文件 mtime 失效</td></tr>
+          <tr><td><b>解码线程</b></td><td>CPU 核数 −1</td><td>UI 永不参与解码</td></tr>
+          <tr><td><b>缩放优先級</b></td><td>—</td><td>拖拽时显示 mip 近似图，松手后重渲染高清</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div class="mini" style="margin-bottom:10px">
+        <div class="t">瓦片金字塔（P2，可选）</div>
+        <div class="d">首版不做。仅当确需打开 ≥ 80 MP 巨图时，才在后台生成 <code>.rat-tile/</code> 三级金字塔。</div>
+      </div>
+      <div class="mini">
+        <div class="t">渐进式显示 UX</div>
+        <div class="d">① 文件头 4 KB 嗅探出格式与尺寸 → 画占位<br>② 内嵌预览图（JPEG/HEIC/CDR 大多自带）→ 40 ms 出图<br>③ 全量解码 → 热替换 + 淡入 120 ms</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6 能力边界 -->
+<div class="card">
+  <h2><span class="num">6</span>保留的操作与实现方式</h2>
+  <p class="desc">
+    轻量路线的取舍标准只有一条：<b>这个操作是不是「看」的一部分</b>。是 → 做；不是 → 交给外部工具，UI 里直接不出现。
+    所有操作默认非破坏性，原文件永不被就地改写。
+  </p>
+  <table>
+    <thead><tr><th style="width:13%">类别</th><th style="width:32%">操作</th><th>实现方式</th><th style="width:10%">矢量</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><b>浏览查看</b></td>
+        <td>缩放（滚轮 / 适应窗口 / 适应宽度 / 1:1）、平移、翻页、幻灯片、全屏</td>
+        <td>视口变换矩阵 + 瓦片按需重采样，UI 线程零解码</td><td>✅</td>
+      </tr>
+      <tr>
+        <td><b>辅助查看</b></td>
+        <td>放大镜 2× 取景、像素网格、EXIF、直方图、主色板、动画播放控制</td>
+        <td>放大镜走 shader 采样；动图按文件内逐帧时长播放（不假定固定 fps）</td><td>✅</td>
+      </tr>
+      <tr>
+        <td><b>几何变换</b></td>
+        <td>顺时针 / 逆时针旋转 90°、任意角度、水平 / 垂直翻转</td>
+        <td>只写 EXIF Orientation + sidecar 角度，导出时才应用</td><td>✅ 改对象变换矩阵</td>
+      </tr>
+      <tr>
+        <td><b>裁剪</b></td>
+        <td>自由 / 固定比例 / 自动切白边</td>
+        <td>非破坏性裁剪矩形，可随时撤回完整画面</td><td>✅ 输出框裁剪</td>
+      </tr>
+      <tr>
+        <td><b>轻量调整</b></td>
+        <td>亮度 · 对比度 · 饱和度 · 一键美化（<b>仅此四项</b>）</td>
+        <td>预览走 GPU shader；导出时在原生位深上一次性计算，避免反复量化丢阶</td><td>⚠ 光栅化后</td>
+      </tr>
+      <tr>
+        <td><b>文件操作</b></td>
+        <td>重命名 F2 · 删除 · 移动 / 复制 · 复制图片到剪贴板 · 复制路径 · 设为壁纸 · 打印 · 用外部编辑器打开</td>
+        <td>删除走 <code>shell.trashItem</code> 进系统回收站，绝不 <code>unlink</code>；剪贴板同时写 CF_DIB 以兼容 Office</td><td>✅</td>
+      </tr>
+      <tr>
+        <td><b>输出</b></td>
+        <td>另存为（默认另存副本）· 格式转换 · 限制长边 · 批量另存</td>
+        <td>JPG / PNG / WebP / AVIF / TIFF，保留 ICC 与 EXIF；矢量源可导出 SVG / PDF 保矢量</td><td>✅</td>
+      </tr>
+      <tr>
+        <td><b>安全阀</b></td>
+        <td>撤销 / 重做 · 未保存提醒</td>
+        <td>操作栈只存参数，回溯 O(1)；关闭窗口时若有未导出修改需二次确认</td><td>✅</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="grid3" style="margin-top:14px">
+    <div class="mini"><div class="t">为什么砍掉专业编辑</div><div class="d">抠图、拼接、曲线调色这类功能要么要带几十 MB 的模型与依赖，要么要一整套面板和状态机。做进来体积与复杂度翻倍，使用率却只有 5%，还会拖慢启动。</div></div>
+    <div class="mini"><div class="t">砍掉之后省了什么</div><div class="d">省掉 ONNX Runtime、曲线/色阶编辑器、批注图层与序列化、超分模型 —— 主包少 40 MB 以上，首屏少一次模型加载。</div></div>
+    <div class="mini"><div class="t">用户要做深度处理怎么办</div><div class="d">右键「用外部编辑器打开」+ 可配置的编辑器列表，一键跳 Photoshop / 画图 / 你惯用的工具。看图器不该假装自己是 PS。</div></div>
+  </div>
+</div>
+
+<!-- 7 里程碑 -->
+<div class="card">
+  <h2><span class="num">7</span>开发里程碑（轻量路线）</h2>
+  <p class="desc">4 个阶段，每一阶段结束都能独立交付一个「能用」的看图器，不出现半成品功能。</p>
+  <table>
+    <thead><tr><th style="width:12%">阶段</th><th style="width:30%">交付物</th><th>验收标准</th></tr></thead>
+    <tbody>
+      <tr><td><b>M1 骨架</b></td><td>Electron 无边框窗口、双主题、四屏布局（看图 / 管理 / 对比 / 批量）</td><td>冷启动 &lt; 1.5 s；主题切换无闪白；安装包 &lt; 25 MB</td></tr>
+      <tr><td><b>M2 看家本领</b></td><td>基础位图解码 + 视口缩放平移 + 缩略图网格 + EXIF</td><td>JPG/PNG/WebP/GIF/BMP/TIFF 全通过；4K 图 &lt; 60 ms；1000 张缩略图 &lt; 2 s</td></tr>
+      <tr><td><b>M3 矢量引擎</b></td><td>CDR / AI / EPS / PDF / SVG / WMF 解析（差异化卖点）</td><td>100 份真实 CDR 稿通过率 ≥ 92%，失败者回落内嵌预览图，绝不显示灰块</td></tr>
+      <tr><td><b>M4 打磨收尾</b></td><td>轻量调整、裁剪浮层、放大镜、批量另存、删除走回收站</td><td>常驻内存 &lt; 180 MB；免安装便携版可用</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 8 风险 -->
+<div class="card">
+  <h2><span class="num">8</span>已知风险与应对</h2>
+  <div class="grid2">
+    <div class="mini">
+      <div class="t">⚠ libcdr 对新版 CDR 支持滞后</div>
+      <div class="d">CorelDRAW 2023/2024 的新记录类型可能解析失败。应对：对象树解析失败即刻回落内嵌预览图，并上报匿名格式样本用于迭代。</div>
+    </div>
+    <div class="mini">
+      <div class="t">⚠ 打包体积</div>
+      <div class="d">libraw + libheif + libavif + skia 全量约 60 MB。应对：按需拆分 codec 插件 DLL，主包仅带 JPEG/PNG/WebP/SVG。</div>
+    </div>
+    <div class="mini">
+      <div class="t">⚠ Windows 上第三方 RAW 专利解码</div>
+      <div class="d">部分厂商白平衡数据在 libraw 还原后有偏差。应对：优先读取文件内嵌 JPEG 预览，必要时提供厂商 SDK 可选开关。</div>
+    </div>
+    <div class="mini">
+      <div class="t">⚠ GDI / DXGI 多屏混合 DPI</div>
+      <div class="d">拖拽到副屏时瓦片重渲染。应对：监听 <code>display-metrics-changed</code>，按目标屏 DPI 重建纹理。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 附录 A 格式支持 -->
+<div class="card">
+  <h2><span class="num">A</span>附录：格式支持总表</h2>
+  <p class="desc">
+    分三层：<b>基础位图编入主包</b>（装完即可开 JPG / PNG / WebP / GIF / BMP / TIFF / ICO / TGA，不需要任何插件或外部程序）·
+    <b>专业位图与 RAW 走按需加载的解析插件</b> · <b>矢量走自研引擎统一解析为对象树</b>。共 4 大族 / 26 类 / 约 130 个扩展名。
+  </p>
+  <table>
+    <thead><tr><th style="width:14%">格式族</th><th style="width:22%">扩展名</th><th style="width:15%">解码库</th><th style="width:8%">透明</th><th style="width:11%">多页/动画</th><th style="width:9%">位深</th><th>已知坑 / 备注</th></tr></thead>
+    <tbody>
+      <tr><td><b>JPEG</b></td><td><code>.jpg .jpeg .jpe .jfif</code></td><td>libjpeg-turbo</td><td>—</td><td>—</td><td>8</td><td>渐进式与 CMYK 需分支处理；<b>EXIF 方向必须应用</b>，否则竖拍照片全部躺倒</td></tr>
+      <tr><td><b>PNG</b></td><td><code>.png .apng</code></td><td>libpng</td><td>✅ alpha</td><td>✅ APNG</td><td>1/2/4/8/16</td><td>隔行扫描；16bit 要保留精度以免调色丢阶</td></tr>
+      <tr><td><b>WebP</b></td><td><code>.webp</code></td><td>libwebp</td><td>✅</td><td>✅ 动画</td><td>8</td><td>无损/有损双模；动图需逐帧时间戳，不能按固定 fps 播</td></tr>
+      <tr><td><b>GIF</b></td><td><code>.gif</code></td><td>giflib</td><td>1bit</td><td>✅ 动画</td><td>8 索引</td><td><b>帧间是差量</b>，必须累积合成，只画单帧会花屏</td></tr>
+      <tr><td><b>BMP</b></td><td><code>.bmp .dib</code></td><td>自研</td><td>32bit 有</td><td>—</td><td>1/4/8/24/32</td><td>RLE 变体、负高度（自下而上存储）两个坑</td></tr>
+      <tr><td><b>TIFF</b></td><td><code>.tif .tiff</code></td><td>libtiff</td><td>✅</td><td>✅ 多页</td><td>1~32 浮点</td><td>多页/金字塔页需切页；印刷场景常见 CMYK + ICC</td></tr>
+      <tr><td><b>ICO/CUR</b></td><td><code>.ico .cur</code></td><td>自研</td><td>✅</td><td>多尺寸</td><td>32</td><td>按当前 DPI 选最合适的那一档尺寸</td></tr>
+      <tr><td><b>TGA</b></td><td><code>.tga .icb</code></td><td>自研</td><td>✅</td><td>—</td><td>8~32</td><td>游戏贴图常用，需支持 RLE 压缩</td></tr>
+      <tr><td><b>PSD/PSB</b></td><td><code>.psd .psb</code></td><td>自研解析</td><td>✅</td><td>图层</td><td>8/16/32</td><td>默认只给合并预览（性能），图层树可展开；PSB 属超大文件</td></tr>
+      <tr><td><b>HEIC/HEIF</b></td><td><code>.heic .heif</code></td><td>libheif</td><td>✅</td><td>序列</td><td>10/12</td><td>连拍多图容器要能切；HDR gain map 需正确映射否则发灰</td></tr>
+      <tr><td><b>AVIF</b></td><td><code>.avif</code></td><td>libavif + dav1d</td><td>✅</td><td>序列</td><td>10/12</td><td>解码较慢，必须走线程池，否则翻页会卡</td></tr>
+      <tr><td><b>JPEG XL</b></td><td><code>.jxl</code></td><td>libjxl</td><td>✅</td><td>✅ 动画</td><td>8/16/32</td><td>渐进解码体验最好，可先出低清再补细节</td></tr>
+      <tr><td><b>OpenEXR</b></td><td><code>.exr</code></td><td>tinyexr</td><td>✅</td><td>多部</td><td>半浮点</td><td>HDR 需色调映射后才能正常显示</td></tr>
+      <tr><td><b>JPEG 2000</b></td><td><code>.jp2 .j2k</code></td><td>openjpeg</td><td>✅</td><td>—</td><td>8~16</td><td>医学与印刷领域，有损/无损双模</td></tr>
+      <tr><td><b>相机 RAW</b></td><td><code>.cr3 .cr2 .nef .arw .dng .raf .orf .rw2 …</code></td><td>libraw 0.21+</td><td>—</td><td>—</td><td>12/14</td><td><b>CR3 需 libraw ≥ 0.21</b>；优先读内嵌预览秒开；白平衡必须用相机元数据否则偏色</td></tr>
+      <tr><td><b>CDR 族</b></td><td><code>.cdr .cdt .cmx .ccx</code></td><td>libcdr + librevenge（独立进程转 SVG，已落地）</td><td>矢量</td><td>⚠ 多页有限</td><td>矢量</td><td>对新版本记录类型有滞后风险，失败即回落内嵌预览图</td></tr>
+      <tr><td><b>AI</b></td><td><code>.ai</code></td><td>PDF 解析器 / PS 解释器</td><td>矢量</td><td>多画板</td><td>矢量</td><td><b>双路径</b>：新版 AI 实为 PDF 兼容，老版为 EPS 兼容，需嗅探文件头后分流</td></tr>
+      <tr><td><b>EPS / PS</b></td><td><code>.eps .ps</code></td><td>受限 PostScript 解释器</td><td>矢量</td><td>—</td><td>矢量</td><td>只实现 Level 2 常用算子；字体缺失时用内嵌轮廓兜底</td></tr>
+      <tr><td><b>PDF</b></td><td><code>.pdf</code></td><td>pdfium</td><td>矢量</td><td>✅ 多页</td><td>矢量+位图</td><td>多页切页、按打印尺寸渲染；矢量与位图混排是常态</td></tr>
+      <tr><td><b>SVG</b></td><td><code>.svg .svgz</code></td><td>自研 SVG 2 子集</td><td>✅</td><td>⚠ 部分 SMIL</td><td>矢量</td><td>滤镜/蒙版只做子集；<b>禁用脚本</b>（安全，防 XSS）</td></tr>
+      <tr><td><b>WMF / EMF</b></td><td><code>.wmf .emf</code></td><td>自研 → 绘图指令</td><td>✅</td><td>—</td><td>矢量</td><td>Office 粘贴图元，需处理记录流与 GDI 状态栈</td></tr>
+      <tr><td><b>DWG / DXF</b></td><td><code>.dwg .dxf</code></td><td>libdxfrw</td><td>—</td><td>布局</td><td>矢量</td><td>黑白出图、线宽、字体替换；大图纸需按图层裁剪</td></tr>
+    </tbody>
+  </table>
+  <div class="grid2" style="margin-top:14px">
+    <div class="mini">
+      <div class="t">为什么把 JPG/PNG 放在第一优先级</div>
+      <div class="d">它们占日常看图量 90% 以上。如果连基础位图都要装插件、或首次打开要下载解码器，产品在第一分钟就被卸载。所以 M2 里程碑只交付基础位图，也必须先交付它。</div>
+    </div>
+    <div class="mini">
+      <div class="t">插件失效的兜底顺序</div>
+      <div class="d">完整解码 → 内嵌预览图（多数专业格式自带）→ 生成低清代理图（首次打开时后台生成）→ 明确告知「暂不支持该版本」并给出替代方案，绝不静默显示灰块。</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  配套文件：<code>design/ui-mockup.html</code>（交互设计稿，含明暗双主题与 4 大场景：看图 / 管理 / 对比 / 批量）。<br>
+  本页所有 svg 随主题变量自动适配；实际实现中 Electron 侧通过 <code>nativeTheme.themeSource = 'system' | 'light' | 'dark'</code> 同步 <code>&lt;html data-theme&gt;</code>，首帧在 preload 阶段写入避免白闪。
+</footer>
+
+</div>
+<script>
+const seg = document.getElementById('seg');
+const set = (t)=>{
+  document.documentElement.setAttribute('data-theme', t);
+  seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.t===t));
+  try{ localStorage.setItem('rat-doc-theme', t);}catch(e){}
+};
+seg.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>set(b.dataset.t)));
+try{ const t=localStorage.getItem('rat-doc-theme'); if(t) set(t);}catch(e){}
+</script>
+</body>
+</html>
